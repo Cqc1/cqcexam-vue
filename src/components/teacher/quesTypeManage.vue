@@ -32,7 +32,7 @@
             >
                 <el-table-column v-if="idFlag" prop="questype" label="questype" align='center'>
                 </el-table-column>
-                <el-table-column type="selection" align='center'>
+                <el-table-column type="selection" align='center':selectable='checkboxT'>
                 </el-table-column>
                 <el-table-column prop="questype" label="试题类型编号" align='center'>
                 </el-table-column>
@@ -40,8 +40,8 @@
                 </el-table-column>
                 <el-table-column prop="operation" align='center' label="操作" width="180">
                     <template slot-scope='scope'>
-                        <el-button type="warning" icon='edit' size="mini" @click='onEditQuesType(scope.row.questype)'>编辑</el-button>
-                        <el-button type="danger" icon='delete' size="mini" @click='removeQuesType(scope.row.questype)'>删除</el-button>
+                        <el-button type="warning" icon='edit' size="mini" :disabled="checkType(scope.row.questype)" @click='onEditQuesType(scope.row.questype)'>编辑</el-button>
+                        <el-button type="danger" icon='delete' size="mini" :disabled="checkType(scope.row.questype)" @click='removeQuesType(scope.row.questype)'>删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -121,6 +121,22 @@
         computed:{
         },
         methods: {
+            //复选框检查是否可操作
+            checkboxT(row,index){
+                if(row.questype==1||row.questype==2||row.questype==3||row.questype==4){
+                    return false;
+                }else{
+                    return true;
+                }
+            },
+            //查是否可操作
+            checkType(questype){
+                if(questype==1||questype==2||questype==3||questype==4){
+                    return true;
+                }else{
+                    return false;
+                }
+            },
             onScreeoutQuesType(searchForm){
                 this.$refs[searchForm].validate((valid) => {
                     if (valid) {
@@ -151,6 +167,7 @@
                     this.pagination = res.data.data;
                     this.loading = false;
                     this.tableData = this.pagination.records;
+                    this.pagination.current=1;
                 }).catch(error => {});
             },
             //改变当前记录条数

@@ -151,6 +151,7 @@
                     this.pagination = res.data.data;
                     this.loading = false;
                     this.tableData = this.pagination.records;
+                    this.pagination.current=1;
                 }).catch(error => {});
             },
             //改变当前记录条数

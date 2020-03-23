@@ -157,7 +157,7 @@
                     let data = res.data
                     if(data.code==200){
                         setTimeout(() => {
-                            this.$router.push({path: '/selectQues'})
+                            this.$router.push({path: '/paperManage'})
                         },1000)
                         this.$message({
                             message: data.message,
