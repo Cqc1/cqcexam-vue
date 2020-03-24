@@ -395,7 +395,7 @@
             handleChange1(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
-                obj = this.options.find((item)=>{
+                obj = this.courses.find((item)=>{
                     return item.value === val;
                 });
                 //obj 就是被选中的那个对象，也就能拿到label值了。

@@ -4,7 +4,7 @@
         <el-row>
             <el-col :span="4" class="topbar-left">
                 <i class="iconfont icon-kaoshi"></i>
-                <span class="title" @click="index()">EXAM-SYSTEM</span>
+                <span class="title" @click="index()">CQC-EXAM</span>
             </el-col>
             <el-col :span="20" class="topbar-right">
                 <i class="el-icon-menu" @click="toggle()"></i>
@@ -84,11 +84,11 @@
     #topbar {
         position: relative;
         z-index: 10;
-        background-color: #124280;
+        background-color: rgba(42, 42, 42, 0.98);
         height: 80px;
         line-height: 80px;
         color: #fff;
-        box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 5px 0px 10px rgba(4, 14, 65, 0.86);
     }
     #topbar .topbar-left {
         height: 80px;

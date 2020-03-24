@@ -3,13 +3,13 @@
     <div id="left">
         <el-menu
                 active-text-color="#dd5862"
-                text-color="#000"
+                text-color="#FFFFFF"
                 :default-active="this.$route.path"
                 class="el-menu-vertical-demo"
                 @open="handleOpen"
                 @close="handleClose"
                 :collapse="flag"
-                background-color="#124280"
+                background-color="#2A2A2A"
                 menu-trigger="click" router>
             <el-submenu v-for="(item,index) in menu" :index='item.index' :key="index">
                 <template slot="title">
@@ -61,7 +61,12 @@
                         title: '教师管理',
                         icon: 'icon-Userselect',
                         content:[{item1:'教师管理',path:'/teacherManage'},{item2: '添加教师',path: '/addTeacher'}],
-                    })
+                    }, {
+                        index: '8',
+                        title: '学院管理',
+                        icon: 'iconkechengguanli',
+                        content:[{item1:'院系管理',path:'/instituteManage'},{item2: '专业管理',path: '/majorManage'},{item2: '班级管理',path: '/classManage'}],
+                        },)
                 }
             }
         },
@@ -74,18 +79,18 @@
         overflow: hidden;
     }
     .left-width .iconfont {
-        font-size: 18px;
+        font-size: 22px;
         color: #fff;
     }
     .left-width {
-        width: 213px;
+        width: 130px;
     }
     .el-menu-vertical-demo:not(.el-menu--collapse) {
         min-height: 900px;
     }
     #left {
         height: 900px;
-        background-color: #124280;
+        background-color: #000000;
         z-index: 0;
     }
     #left .el-menu-vertical-demo .title {

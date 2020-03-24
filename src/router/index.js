@@ -33,18 +33,20 @@ const routes = [
       //   path: '/allStudentsGrade', //所有学生成绩统计
       //   component: () => import('@/components/teacher/allStudentsGrade')
       // },
-      // {
-      //   path: '/examDescription', //考试管理功能描述
-      //   component: () => import('@/components/teacher/examDescription')
-      // },
-      // {
-      //   path: '/selectExam', //查询所有考试
-      //   component: () => import('@/components/teacher/selectExam')
-      // },
-      // {
-      //   path: '/addExam', //添加考试
-      //   component: () => import('@/components/teacher/addExam')
-      // },
+       /* 考试管理模块*/
+      {
+        path: '/examDescription', //考试管理功能描述
+        component: () => import('@/components/teacher/examDescription')
+      },
+      {
+        path: '/examManage', //查询所有考试
+        component: () => import('@/components/teacher/examManage')
+      },
+      {
+        path: '/addExam', //添加考试
+        component: () => import('@/components/teacher/addExam')
+      },
+       /* 题库管理模块*/
       {
         path: '/quesTypeManage', //题库管理功能介绍
         component: ()=> import('@/components/teacher/quesTypeManage')
@@ -57,6 +59,7 @@ const routes = [
         path: '/addQues', //增加题库主界面
         component: () => import('@/components/teacher/addQues')
       },
+       /* 课程管理模块*/
       {
         path: '/courseManage', //课程管理界面
         component: () => import('@/components/teacher/courseManage')
@@ -65,6 +68,7 @@ const routes = [
         path: '/addCourse', //添加课程界面
         component: () => import('@/components/teacher/addCourse')
       },
+       /* 试卷管理模块*/
       {
         path: '/paperManage', //试卷管理界面
         component: () => import('@/components/teacher/paperManage')
@@ -73,6 +77,7 @@ const routes = [
         path: '/addPaper', //添加试卷界面
         component: () => import('@/components/teacher/addPaper')
       },
+       /* 学生管理模块*/
       {
         path: '/studentManage', //学生管理界面
         component: () => import('@/components/teacher/studentManage')
@@ -81,6 +86,7 @@ const routes = [
         path: '/addStudent', //添加学生
         component: () => import('@/components/teacher/addStudent')
       },
+        /*教师管理模块*/
       {
         path: '/teacherManage',
         component: () => import('@/components/admin/teacherManage')
@@ -88,7 +94,20 @@ const routes = [
       {
         path: '/addTeacher',
         component: () => import ('@/components/admin/addTeacher')
-      }
+      },
+       /*院系管理模块*/
+      {
+        path: '/instituteManage',
+        component: () => import ('@/components/admin/instituteManage')
+      },
+      {
+        path: '/majorManage',
+        component: () => import ('@/components/admin/majorManage')
+      },
+      {
+        path: '/classManage',
+        component: () => import ('@/components/admin/classManage')
+      },
     ]
   }
 ]
