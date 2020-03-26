@@ -7,8 +7,11 @@
                     :rules="rules"
                     ref="search_data"
                     class="demo-form-inline search-form">
+                <el-form-item  prop="id">
+                    <el-input v-model.number="search_data.id"  placeholder="学生编号" @keyup.enter.native="onScreeoutStudent('search_data')"></el-input>
+                </el-form-item>
                 <el-form-item label="">
-                    <el-input v-model="search_data.name" :rules="rules" placeholder="用户名"  @keyup.enter.native='onScreeoutStudent("search_data")'></el-input>
+                    <el-input v-model="search_data.name"  placeholder="学生姓名关键字"  @keyup.enter.native="onScreeoutStudent('search_data')"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size ="mini" icon="search" @click='onScreeoutStudent("search_data")'>筛选</el-button>
@@ -40,7 +43,7 @@
                 </el-table-column>
                 <el-table-column prop="sex" label="性别" align='center'>
                 </el-table-column>
-                <el-table-column prop="classname" label="班级" align='center'>
+                <el-table-column prop="clazz.calname" label="班级" align='center'>
                 </el-table-column>
                 <el-table-column prop="email" label="电子邮箱" align='center'>
                 </el-table-column>
@@ -80,8 +83,15 @@
                         <el-form-item label="密码">
                             <el-input v-model="form.stupwd"></el-input>
                         </el-form-item>
-                        <el-form-item label="班级">
-                            <el-input v-model="form.classname"></el-input>
+                        <el-form-item  label="所属班级">
+                            <el-select v-model="form.clazzid" :placeholder="form.clazz.calname" @change="change()">
+                                <el-option
+                                        v-for="item in Clazzs"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                         <el-form-item label="性别">
                             <el-input v-model="form.sex"></el-input>
@@ -107,14 +117,16 @@
     export default {
         data(){
             return {
+                Clazzs:[],
                 search_data:{
                     startTime:'',
-                    endTime:'',
+                    id:'',
                     name:''
                 },
                 rules: {
-                    name: [
-                        { required: true, message: '请输入用户名', trigger: 'blur' },
+                    id: [
+                        { required: false, message: '请输入学生学号', trigger: 'blur' },
+                        { type: 'number', message: '请输入数字类型', trigger: 'blur' },
                     ]
                 },
                 tableData: [],
@@ -135,31 +147,77 @@
                     size: 6, //每页条数
                 },
                 dialogVisible: false, //对话框
-                form: {}, //保存点击以后当前试卷的信息
+                form: {
+                    clazz:{
+                        clazzid:'',
+                        calname:''
+                    }
+                }, //保存点击以后当前试卷的信息
 
             }
         },
         created() {
             this.getStudentInfo();
+            this.getClazz();
         },
         computed:{
         },
         methods: {
 
             onScreeoutStudent(searchForm){
-                this.$refs[searchForm].validate((valid) => {
-                    if (valid) {
-                        //按条件查询信息
-                        this.$axios(`/api/stu/${this.search_data.name}`).then(res => {
-                            this.pagination.total = res.data.data.length;
-                            this.tableData=[];
-                            for(var i=0;i<res.data.data.length;i++){
-                                    this.tableData.push(res.data.data[i]);
+                if(this.search_data.name!=''&&this.search_data.id!='') {
+                    this.$message({
+                        message: '请不要同时输入筛选',
+                        type: 'error'
+                    })
+                }else if(this.search_data.id!=''){
+                    this.$refs[searchForm].validate((valid) => {
+                        if (valid) {
+                            //按条件查询信息
+                            this.$axios(`/api/student/${this.search_data.id}`).then(res => {
+                                /*this.loading = false;*/
+                                if(res.data.code ==200) {
+                                    this.pagination.total = res.data.data.length;
+                                    this.tableData=[];
+                                    this.tableData.push(res.data.data);
+                                    this.tableData=res.data
+                                    this.$message({
+                                        message: '查询成功',
+                                        type: 'success'
+                                    })
+                                }else{
+                                    this.$message({
+                                        message: res.data.message,
+                                        type: 'error'
+                                    })
                                 }
-                            this.loading = false;
-                        }).catch(error => {});
-                    }
-                })
+                            }).catch(error => {});
+                        }
+                    })
+                }else if(this.search_data.name!=''){
+                            //按条件查询信息
+                            this.$axios(`/api/stu/${this.search_data.name}`).then(res => {
+                                if(res.data.code ==200) {
+                                    this.pagination.total = res.data.data.length;
+                                    this.tableData=[];
+                                    for(var i=0;i<res.data.data.length;i++){
+                                        this.tableData.push(res.data.data[i]);
+                                    }
+                                    this.loading = false;
+                                    this.$message({
+                                        message: '查询成功',
+                                        type: 'success'
+                                    })
+                                }else{
+                                    this.$message({
+                                        message: res.data.message,
+                                        type: 'error'
+                                    })
+                                }
+                            }).catch(error => {});
+                }else{
+                    this.getStudentInfo();
+                }
             },
             getStudentInfo() {
                 //分页查询所有试卷信息
@@ -169,6 +227,18 @@
                     this.tableData = this.pagination.records;
                     this.pagination.current=1;
                 }).catch(error => {});
+            },
+            getClazz(){
+                //分页查询所有班级信息
+                this.$axios(`/api/clazz/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.Clazzs.push({label:element.calname,value:element.clazzid});
+                    })
+                }).catch(error => {});
+            },
+            change(){
+                this.$forceUpdate()
             },
             //改变当前记录条数
             handleSizeChange(val) {

@@ -302,7 +302,6 @@
                     this.loading = false;
                     this.tableData=[];
                     this.tableData = this.pagination.records;
-                    this.pagination.current=1;
                 }).catch(error => {});
             },
             //改变当前记录条数
@@ -394,7 +393,8 @@
                             message: res.data.message,
                             type: 'success'
                         })
-                        this.getClazzInfo()
+                        this.getClazzInfo();
+                        this.pagination.current=1
                     })
                 }).catch(() => {})
             },
@@ -427,6 +427,7 @@
                         })
                         console.log("====="+ids);
                         this.getClazzInfo()
+                        this.pagination.current=1
                     })
                 }).catch(() => {})
             },

@@ -7,8 +7,19 @@
                 <section class="append">
                     <ul>
                         <li>
+                            <span>所属学院：</span>
+                            <el-select v-model="instituValue" @change="handleChange1" placeholder="请选择学院">
+                                <el-option
+                                        v-for="item in institutions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </li>
+                        <li>
                         <span>所属课程：</span>
-                        <el-select v-model="formData.courseid" @change="handleChange" placeholder="请选择课程" class="w150">
+                        <el-select v-model="formData.courseid" @change="handleChange2" :placeholder="placeholder" class="w150">
                             <el-option
                                     v-for="item in courses"
                                     :key="item.value"
@@ -60,6 +71,9 @@
         data() {
             return {
                 activeName: 'first',  //活动选项卡
+                institutions:[],//学院下拉框
+                instituValue: '',
+                placeholder:'',
                 courses: [], //试题所属科目
                 formData: { //提交内容
                     courseid:'',
@@ -117,6 +131,7 @@
         created() {
             this.getQuesTypeInfo();
             this.getCourseInfo();
+            this.getInstitution();//获取学院
         },
         methods: {
             async getQuesTypeInfo() {
@@ -134,8 +149,51 @@
                     })
                 }).catch(error => {});
             },
+            getInstitution(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                    this.institutions.push({label:"所有学院的课程",value:0});
+                }).catch(error => {});
+            },
             //获取下拉框中的值
-            handleChange(val){
+            handleChange1(val){
+                //传进来的val是select组件选中的value值
+                let obj = {}; //用来存储下拉框中的对象
+                obj = this.institutions.find((item) => {
+                    return item.value === val;
+                });
+                //obj 就是被选中的那个对象，也就能拿到label值了。
+                console.log(obj.label)//label值
+                console.log(obj.value)//value值
+                // this.select=obj;
+                if (val == 0) {
+                    this.courses = [];
+                    this.getCourseInfo();  //获取专业
+                } else {
+                    this.$axios(`/api/courses/selectByinstituteId/${val}`).then(res => {
+                        this.courses = [];
+                        this.placeholder = "请选择";
+                        if (res.data.data.length > 0) {
+                            res.data.data.forEach(element => {
+                                this.courses.push({label: element.couname, value: element.courseid});
+                            })
+                            this.loading = false;
+                            /*this.majorValue=this.majors[0].label*/
+                            this.formData.courseid = ''
+                            this.placeholder = "请选择";
+                        } else {
+                            this.formData.courseid = ''
+                            this.placeholder = "该院系下目前未设课程";
+                        }
+                    })
+                }
+            },
+            //获取下拉框中的值
+            handleChange2(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
                 obj = this.courses.find((item)=>{
@@ -145,32 +203,39 @@
                 this.formData.courseid=obj.value;
             },
             Submit() { //提交
-                this.formData.user=this.$cookies.get("cname")
-                this.$axios({
-                    url: '/api/item',
-                    method: 'post',
-                    data: {
-                        ...this.formData
-                    }
-                }).then(res => {
-                    console.log(res)
-                    let data = res.data
-                    if(data.code==200){
-                        setTimeout(() => {
-                            this.$router.push({path: '/paperManage'})
-                        },1000)
-                        this.$message({
-                            message: data.message,
-                            type: 'success'
-                        })
-                    }else if(data.code==400){
-                        this.$message({
-                            message: data.message,
-                            type: 'error'
-                        })
-                    }
+                if(this.formData.courseid!=''&&this.formData.level!='') {
+                    this.formData.user = this.$cookies.get("cname")
+                    this.$axios({
+                        url: '/api/item',
+                        method: 'post',
+                        data: {
+                            ...this.formData
+                        }
+                    }).then(res => {
+                        console.log(res)
+                        let data = res.data
+                        if (data.code == 200) {
+                            setTimeout(() => {
+                                this.$router.push({path: '/paperManage'})
+                            }, 1000)
+                            this.$message({
+                                message: data.message,
+                                type: 'success'
+                            })
+                        } else if (data.code == 400) {
+                            this.$message({
+                                message: data.message,
+                                type: 'error'
+                            })
+                        }
 
-                })
+                    })
+                }else{
+                    this.$message({
+                        message: '请选择所属课程以及难度等级!',
+                        type: 'error'
+                    })
+                }
             },
         }
     };

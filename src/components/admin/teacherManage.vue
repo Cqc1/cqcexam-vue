@@ -5,11 +5,14 @@
             <el-form
                     :inline="true"
                     :model='search_data'
-                    :rules="rule"
+                    :rules="rules"
                     ref="search_data"
                     class="demo-form-inline search-form">
+                <el-form-item  prop="id">
+                    <el-input v-model.number="search_data.id"  placeholder="教师编号" @keyup.enter.native='onScreeoutTeacher("search_data")'></el-input>
+                </el-form-item>
                 <el-form-item label="">
-                    <el-input v-model="search_data.name" :rules="rule" placeholder="用户名"  @keyup.enter.native='onScreeoutTeacher("search_data")'></el-input>
+                    <el-input v-model="search_data.name"  placeholder="教师姓名关键字"  @keyup.enter.native='onScreeoutTeacher("search_data")'></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size ="mini" icon="search" @click='onScreeoutTeacher("search_data")'>筛选</el-button>
@@ -41,7 +44,7 @@
                 </el-table-column>
                 <el-table-column prop="sex" label="性别" align='center'>
                 </el-table-column>
-                <el-table-column prop="yuanname" label="院系" align='center'>
+                <el-table-column prop="institution.instituname" label="院系" align='center'>
                 </el-table-column>
                 <el-table-column prop="email" label="电子邮箱" align='center'>
                 </el-table-column>
@@ -81,8 +84,15 @@
                         <el-form-item label="密码">
                             <el-input v-model="form.teapwd"></el-input>
                         </el-form-item>
-                        <el-form-item label="院系">
-                            <el-input v-model="form.yuanname"></el-input>
+                        <el-form-item  label="所属院系">
+                            <el-select v-model="form.institutionid" :placeholder="form.institution.instituname" @change="change()">
+                                <el-option
+                                        v-for="item in institutions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                         <el-form-item label="性别">
                             <el-input v-model="form.sex"></el-input>
@@ -108,14 +118,15 @@
     export default {
         data(){
             return {
+                institutions:[],
                 search_data:{
-                    startTime:'',
-                    endTime:'',
+                    id:'',
                     name:''
                 },
-                rule: {
-                    name: [
-                        { required: true, message: '请输入用户名', trigger: 'blur' },
+                rules: {
+                    id: [
+                        { required: false, message: '请输入教师编号', trigger: 'blur' },
+                        { type: 'number', message: '请输入数字类型', trigger: 'blur' },
                     ]
                 },
                 tableData: [],
@@ -136,31 +147,75 @@
                     size: 6, //每页条数
                 },
                 dialogVisible: false, //对话框
-                form: {}, //保存点击以后当前试卷的信息
+                form: {
+                    institution:{
+                        institutionid:'',
+                        instituname:'',
+                    }
+                }, //保存点击以后当前试卷的信息
 
             }
         },
         created() {
             this.getTeacherInfo();
+            this.getInstitution();
         },
         computed:{
         },
         methods: {
-
             onScreeoutTeacher(searchForm){
-                this.$refs[searchForm].validate((valid) => {
-                    if (valid) {
-                        //按条件查询信息
-                        this.$axios(`/api/tea/${this.search_data.name}`).then(res => {
-                            this.pagination.total = res.data.data.length;
-                            this.tableData=[];
-                            for(var i=0;i<res.data.data.length;i++){
-                                this.tableData.push(res.data.data[i]);
-                            }
-                            this.loading = false;
-                        }).catch(error => {});
-                    }
-                })
+                if(this.search_data.name!=''&&this.search_data.id!='') {
+                    this.$message({
+                        message: '请不要同时输入筛选',
+                        type: 'error'
+                    })
+                }else if(this.search_data.id!=''){
+                    this.$refs[searchForm].validate((valid) => {
+                        if (valid) {
+                            //按条件查询信息
+                            this.$axios(`/api/teacher/${this.search_data.id}`).then(res => {
+                                if(res.data.code ==200) {
+                                    this.pagination.total = res.data.data.length;
+                                    this.tableData=[];
+                                    this.tableData.push(res.data.data);
+                                    this.loading = false;
+                                    this.$message({
+                                        message: '查询成功',
+                                        type: 'success'
+                                    })
+                                }else{
+                                    this.$message({
+                                        message: res.data.message,
+                                        type: 'error'
+                                    })
+                                }
+                            }).catch(error => {});
+                        }
+                    })
+                }else if(this.search_data.name!=''){
+                            //按条件查询信息
+                            this.$axios(`/api/tea/${this.search_data.name}`).then(res => {
+                                if(res.data.code ==200) {
+                                    this.pagination.total = res.data.data.length;
+                                    this.tableData=[];
+                                    for(var i=0;i<res.data.data.length;i++){
+                                        this.tableData.push(res.data.data[i]);
+                                    }
+                                    this.loading = false;
+                                    this.$message({
+                                        message: '查询成功',
+                                        type: 'success'
+                                    })
+                                }else{
+                                    this.$message({
+                                        message: res.data.message,
+                                        type: 'error'
+                                    })
+                                }
+                            }).catch(error => {});
+                }else{
+                    this.getTeacherInfo();
+                }
             },
             getTeacherInfo() {
                 //分页查询所有试卷信息
@@ -168,8 +223,19 @@
                     this.pagination = res.data.data;
                     this.loading = false;
                     this.tableData = this.pagination.records;
-                    this.pagination.current=1;
                 }).catch(error => {});
+            },
+            getInstitution(){
+                //分页查询所有院系信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                }).catch(error => {});
+            },
+            change(){
+                this.$forceUpdate()
             },
             //改变当前记录条数
             handleSizeChange(val) {
@@ -225,6 +291,7 @@
                             type: 'success'
                         })
                         this.getTeacherInfo()
+                        this.pagination.current=1;
                     })
                 }).catch(() => {})
             },
@@ -257,6 +324,7 @@
                         })
                         console.log("====="+ids);
                         this.getTeacherInfo()
+                        this.pagination.current=1;
                     })
                 }).catch(() => {})
             },

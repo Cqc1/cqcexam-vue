@@ -9,7 +9,17 @@
                     ref="search_data"
                     class="demo-form-inline search-form">
                 <el-form-item>
-                    <el-select v-model="value" @change="handleChange1" placeholder="请选择">
+                    <el-select v-model="instituValue" @change="handleChange1" placeholder="请选择学院">
+                        <el-option
+                                v-for="item in institutions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-select v-model="Value" @change="handleChange2" :placeholder="placeholder">
                         <el-option
                                 v-for="item in courses"
                                 :key="item.value"
@@ -19,7 +29,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-select v-model="value" @change="handleChange2" placeholder="请选择">
+                    <el-select v-model="value" @change="handleChange3" placeholder="请选择">
                         <el-option
                                 v-for="item in options"
                                 :key="item.value"
@@ -29,7 +39,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">
-                    <el-input v-model="search_data.name" :rules="rules" placeholder="题目信息"  @keyup.enter.native='onScreeoutQues("search_data")'></el-input>
+                    <el-input v-model="search_data.name"  placeholder="题目信息关键字"  @keyup.enter.native='onScreeoutQues("search_data")'></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size ="mini" icon="search" @click='onScreeoutQues("search_data")'>筛选</el-button>
@@ -77,6 +87,7 @@
             <el-pagination
                     @size-change="handleSizeChange"
                     @current-change="handleCurrentChange"
+                    v-if="isPagination"
                     :current-page="pagination.current"
                     :page-sizes="[6, 10]"
                     :page-size="pagination.size"
@@ -144,6 +155,9 @@
     export default {
         data(){
             return {
+                institutions:[],//学院下拉框
+                instituValue: '',
+                placeholder:'',
                 search_data:{
                     startTime:'',
                     endTime:'',
@@ -165,6 +179,7 @@
                 disabled:true,
                 loading:true,
                 idFlag:false,
+                isPagination:true,
                 look: false,//便于编辑与查看时状态的转换
                 pagination: {
                     //分页后的考试信息
@@ -180,6 +195,7 @@
                 select:{value:-1},//保存选择器中的信息
                 options: [],     //试题类型信息
                 courses: [],       //试题所属科目
+                Value:'',//课程值
                 value: ''
             }
         },
@@ -187,6 +203,7 @@
             this.getQuesInfo();
             this.getQuesTypeInfo();
             this.getCourseInfo();
+            this.getInstitution();//获取学院
         },
         computed:{
         },
@@ -241,7 +258,7 @@
                     this.pagination = res.data.data;
                     this.loading = false;
                     this.tableData = this.pagination.records;
-                    this.pagination.current=1;
+                    this.isPagination=true;
                 }).catch(error => {});
             },
             //改变当前记录条数
@@ -252,7 +269,7 @@
             //改变当前页码，重新发送请求
             handleCurrentChange(val) {
                 this.pagination.current = val;
-                    this.getQuesInfo();
+                this.getQuesInfo();
             },
             //查看操作方法
             preQues(quesid,type){
@@ -284,6 +301,7 @@
                                         type: 'success'
                                     })
                                     this.getQuesInfo()
+                                    this.pagination.current=1;
                                 }
                             })
                     } else if (questype == "2") {
@@ -296,6 +314,7 @@
                                         type: 'success'
                                     })
                                     this.getQuesInfo()
+                                    this.pagination.current=1;
                                 }
                             })
                     } else if (questype == "3") {
@@ -308,6 +327,7 @@
                                         type: 'success'
                                     })
                                     this.getQuesInfo()
+                                    this.pagination.current=1;
                                 }
                             })
                     } else if (questype == "4") {
@@ -320,6 +340,7 @@
                                         type: 'success'
                                     })
                                     this.getQuesInfo()
+                                    this.pagination.current=1;
                                 }
                             })
                     } else {
@@ -332,6 +353,7 @@
                                         type: 'success'
                                     })
                                     this.getQuesInfo()
+                                    this.pagination.current=1;
                                 }
                             })
                     }
@@ -377,6 +399,7 @@
                             })
                             console.log("=====" + ids);
                             this.getQuesInfo()
+                            this.pagination.current=1;
                         }
                     }).catch(() => {
                     })
@@ -391,8 +414,50 @@
                     this.disabled = false;
                 }
             },
+            getInstitution(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                    this.institutions.push({label:"所有学院的课程",value:0});
+                }).catch(error => {});
+            },
             //获取下拉框中的值
             handleChange1(val){
+                //传进来的val是select组件选中的value值
+                let obj = {}; //用来存储下拉框中的对象
+                obj = this.institutions.find((item) => {
+                    return item.value === val;
+                });
+                //obj 就是被选中的那个对象，也就能拿到label值了。
+                console.log(obj.label)//label值
+                console.log(obj.value)//value值
+                // this.select=obj;
+                if (val == 0) {
+                    this.courses = [];
+                    this.getCourseInfo();  //获取课程
+                } else {
+                    this.$axios(`/api/courses/selectByinstituteId/${val}`).then(res => {
+                        this.courses = [];
+                        this.placeholder = "请选择";
+                        if (res.data.data.length > 0) {
+                            res.data.data.forEach(element => {
+                                this.courses.push({label: element.couname, value: element.courseid});
+                            })
+                            this.loading = false;
+                            /*this.majorValue=this.majors[0].label*/
+                            this.Value = ''
+                        } else {
+                            this.value = ''
+                            this.placeholder = "该院系下目前未设课程";
+                        }
+                    })
+                }
+            },
+            //获取下拉框中的值
+            handleChange2(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
                 obj = this.courses.find((item)=>{
@@ -404,6 +469,7 @@
                 // this.select=obj;
                 if(val==0){
                     this.getQuesInfo();
+                    this.value=''
                 }else {
                     this.$axios(`/api/ques/selectBycourse/${val}`).then(res => {
                         this.pagination.total = res.data.data.length;
@@ -413,9 +479,11 @@
                         }
                         this.loading = false;
                     })
+                    this.value=''
+                    this.isPagination=false;
                 }
             },
-            handleChange2(val){
+            handleChange3(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
                 obj = this.options.find((item)=>{
@@ -425,6 +493,7 @@
                 console.log(obj.label)//label值
                 console.log(obj.value)//value值
                 this.select=obj;
+                this.Value=''
                 if(val==0){
                     this.getQuesInfo();
                 }else {
@@ -434,7 +503,8 @@
                         for (var i = 0; i < res.data.data.length; i++) {
                             this.tableData.push(res.data.data[i]);
                         }
-                        this.loading = false;
+                        this.loading = false
+                        this.isPagination=false;
                     })
                 }
             },

@@ -7,8 +7,18 @@
                     :rules="rules"
                     ref="search_data"
                     class="demo-form-inline search-form">
+                <el-form-item>
+                    <el-select v-model="instituValue" @change="handleChange" placeholder="请选择学院">
+                        <el-option
+                                v-for="item in institutions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="">
-                    <el-input v-model="search_data.name" :rules="rules" placeholder="课程名"  @keyup.enter.native='onScreeoutCourse("search_data")'></el-input>
+                    <el-input v-model="search_data.name" :rules="rules" placeholder="课程名关键字"  @keyup.enter.native='onScreeoutCourse("search_data")'></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size ="mini" icon="search" @click='onScreeoutCourse("search_data")'>筛选</el-button>
@@ -37,6 +47,8 @@
                 <el-table-column prop="courseid" label="课程编号" align='center'>
                 </el-table-column>
                 <el-table-column prop="couname" label="课程名称" align='center'>
+                </el-table-column>
+                <el-table-column prop="institution.instituname" label="所属学院" align='center'>
                 </el-table-column>
                 <el-table-column prop="couperiod" label="课时" align='center'>
                 </el-table-column>
@@ -73,6 +85,16 @@
                         <el-form-item label="课程名称">
                             <el-input v-model="form.couname"></el-input>
                         </el-form-item>
+                        <el-form-item v-if="edit" label="所属院系">
+                            <el-select v-model="form.institutionid" v-if="edit" @change="change" placeholder="请选择学院">
+                                <el-option
+                                        v-for="item in Institutions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
                         <el-form-item label="课程学时">
                             <el-input v-model="form.couperiod"></el-input>
                         </el-form-item>
@@ -94,6 +116,10 @@
     export default {
         data(){
             return {
+                Institutions:[],//学院下拉框
+                institutions:[],//学院下拉框
+                instituValue: '',
+                edit:true,//用于添加时的条件判断
                 search_data:{
                     startTime:'',
                     endTime:'',
@@ -126,6 +152,8 @@
         },
         created() {
             this.getCourseInfo();
+            this.getInstitution();//获取学院
+            this.getInstitution2();//获取学院
         },
         computed:{
         },
@@ -143,7 +171,54 @@
                             this.loading = false;
                         }).catch(error => {});
                     }
+                    if(this.search_data.name=='') {
+                        this.getCourseInfo();
+                    }
                 })
+            },
+            getInstitution(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                    this.institutions.push({label:"所有学院的专业",value:0});
+                }).catch(error => {});
+            },
+            getInstitution2(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    this.Institutions=[];
+                    res.data.data.forEach(element => {
+                        this.Institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                }).catch(error => {});
+            },
+            //获取下拉框中的值
+            handleChange(val){
+                //传进来的val是select组件选中的value值
+                let obj = {}; //用来存储下拉框中的对象
+                obj = this.institutions.find((item) => {
+                    return item.value === val;
+                });
+                if (val == 0) {
+                    this.getCourseInfo();
+                } else {
+                    this.$axios(`/api/courses/selectByinstituteId/${val}`).then(res => {
+                        this.tableData = [];
+                        this.pagination.total = res.data.data.length;
+                        this.tableData = [];
+                        for (var i = 0; i < res.data.data.length; i++) {
+                            this.tableData.push(res.data.data[i]);
+                        }
+                        this.loading = false;
+                    })
+                }
+            },
+            change(){
+                this.$forceUpdate()
             },
             getCourseInfo() {
                 //分页查询所有课程信息

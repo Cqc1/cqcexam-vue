@@ -9,7 +9,17 @@
                     ref="search_data"
                     class="demo-form-inline search-form">
                 <el-form-item>
-                    <el-select v-model="value" @change="handleChange" placeholder="请选择">
+                    <el-select v-model="instituValue" @change="handleChange1" placeholder="请选择学院">
+                        <el-option
+                                v-for="item in institutions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-select v-model="value" @change="handleChange2" :placeholder="placeholder">
                         <el-option
                                 v-for="item in courses"
                                 :key="item.value"
@@ -19,7 +29,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">
-                    <el-input v-model="search_data.name" :rules="rules" placeholder="出卷人姓名"  @keyup.enter.native='onScreeoutQues("search_data")'></el-input>
+                    <el-input v-model="search_data.name"  placeholder="出卷人姓名关键字"  @keyup.enter.native='onScreeoutQues("search_data")'></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size ="mini" icon="search" @click='onScreeoutPaper("search_data")'>筛选</el-button>
@@ -129,6 +139,9 @@
     export default {
         data(){
             return {
+                institutions:[],//学院下拉框
+                instituValue: '',
+                placeholder:'',
                 search_data:{
                     startTime:'',
                     endTime:'',
@@ -180,6 +193,7 @@
         created() {
             this.getPaperInfo();
             this.getCourseInfo();
+            this.getInstitution();//获取学院
         },
         computed:{
         },
@@ -194,9 +208,50 @@
                     this.courses.push({label:"所有课程试卷",value:0});
                 }).catch(error => {});
             },
+            getInstitution(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                    this.institutions.push({label:"所有学院的课程",value:0});
+                }).catch(error => {});
+            },
+            //获取下拉框中的值
+            handleChange1(val){
+                //传进来的val是select组件选中的value值
+                let obj = {}; //用来存储下拉框中的对象
+                obj = this.institutions.find((item) => {
+                    return item.value === val;
+                });
+                //obj 就是被选中的那个对象，也就能拿到label值了。
+                console.log(obj.label)//label值
+                console.log(obj.value)//value值
+                // this.select=obj;
+                if (val == 0) {
+                    this.courses = [];
+                    this.getCourseInfo();  //获取专业
+                } else {
+                    this.$axios(`/api/courses/selectByinstituteId/${val}`).then(res => {
+                        this.courses = [];
+                        this.placeholder = "请选择";
+                        if (res.data.data.length > 0) {
+                            res.data.data.forEach(element => {
+                                this.courses.push({label: element.couname, value: element.courseid});
+                            })
+                            this.loading = false;
+                            /*this.majorValue=this.majors[0].label*/
+                            this.value = ''
+                        } else {
+                            this.value = ''
+                            this.placeholder = "该院系下目前未设课程";
+                        }
+                    })
+                }
+            },
             onScreeoutPaper(searchForm){
                 this.$refs[searchForm].validate((valid) => {
-                    this.$confirm('请输入正确的组卷人姓名，否则无法筛选', '提示').then(() => {
                         if (valid&&this.search_data.name!='') {
                             //按条件查询信息
                             this.$axios(`/api/paper_user/${this.search_data.name}`).then(res => {
@@ -209,14 +264,9 @@
                             }).catch(error => {
                             });
                         } else {
-                            this.$message({
-                                message: '无法进行筛选',
-                                type: 'error'
-                            })
                             this.getPaperInfo()
                         }
                     })
-                })
             },
             getPaperInfo() {
                 //分页查询所有试题信息
@@ -329,7 +379,7 @@
                 }
             },
             //获取下拉框中的值
-            handleChange(val){
+            handleChange2(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
                 obj = this.courses.find((item)=>{

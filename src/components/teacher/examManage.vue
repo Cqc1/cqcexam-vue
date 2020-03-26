@@ -7,16 +7,6 @@
                 ref="search_data"
                 class="demo-form-inline search-form">
             <el-form-item>
-                <el-select v-model="value" @change="handleChange" placeholder="请选择">
-                    <el-option
-                            v-for="item in courses"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item>
                 <div class="searchWord el-form-item">
                     <el-input class="el-form-item__content search-input" v-model="search" placeholder="请输入搜索内容">
                     </el-input>
@@ -24,50 +14,57 @@
                 </div>
             </el-form-item>
             <el-form-item class="btnRight">
-                <el-button type="primary" size ="mini" icon="view"  >批量删除</el-button>
+                <el-button type="primary" size ="mini" icon="view" @click='onBatchDelExam(sels)' :disabled="this.sels.length === 0||this.disabled" >批量删除</el-button>
                 <el-button type="success" size ="mini" icon="view">导出Elcel</el-button>
             </el-form-item>
         </el-form>
     </div>
         <div class="table_container">
     <el-table
+            v-loading="loading"
             :data="tables"
-            style="width: 100%">
+            style="width: 100%"
+            align='center'
+            @selection-change="selsChange"
+            ref="table"
+            stripe :default-sort="{prop: 'createAt', order: 'descending'}"
+    >
         <el-table-column type="expand">
             <template slot-scope="props">
                 <el-form label-position="left" inline class="demo-table-expand">
-                    <el-form-item label="考试编号">
+                    <el-form-item label="考试编号：">
                         <span>{{ props.row.examid }}</span>
                     </el-form-item>
-                    <el-form-item label="试卷编号">
+                    <el-form-item label="试卷编号：">
                         <span>{{ props.row.paperid}}</span>
                     </el-form-item>
-                    <el-form-item label="所属课程">
+                    <el-form-item label="所属课程：">
                         <span>{{ props.row.course.couname }}</span>
                     </el-form-item>
-                    <el-form-item label="年级">
+                    <el-form-item label="年级：">
                         <span>{{ props.row.grade }}</span>
                     </el-form-item>
-                    <el-form-item label="学期">
+                    <el-form-item label="学期：">
                         <span>{{ props.row.term }}</span>
                     </el-form-item>
-                    <el-form-item label="专业">
-                        <span>{{ props.row.major }}</span>
+                    <el-form-item label="专业：">
+                        <span>{{ props.row.major.major }}</span>
                     </el-form-item>
-                    <el-form-item label="学院">
-                        <span>{{ props.row.institution}}</span>
+                    <el-form-item label="学院：">
+                        <span>{{ props.row.institution.instituname}}</span>
                     </el-form-item>
-                    <el-form-item label="考试时长">
+                    <el-form-item label="考试时长：">
                         <span>{{ props.row.extime}}</span>
                     </el-form-item>
-                    <el-form-item label="考试日期">
+                    <el-form-item label="考试日期：">
                         <span>{{ props.row.exdate}}</span>
                     </el-form-item>
-                    <el-form-item label="考试介绍">
+                    <el-form-item label="考试介绍：">
                         <span>{{ props.row.description}}</span>
                     </el-form-item>
-                    <el-form-item label="是否已考">
-                        <span>{{ props.row.isexam}}</span>
+                    <el-form-item label="是否已考：">
+                        <span v-if="props.row.isexam==1">已考</span>
+                        <span v-if="props.row.isexam==0">未考</span>
                     </el-form-item>
                 </el-form>
             </template>
@@ -86,21 +83,20 @@
         </el-table-column>
         <el-table-column
                 label="所属学院"
-                prop="institution">
+                prop="institution.instituname">
         </el-table-column>
         <el-table-column
                 label="所属专业"
-                prop="major">
+                prop="major.major">
         </el-table-column>
         <el-table-column
                 label="考试日期"
-                prop="exDate">
+                prop="exdate">
         </el-table-column>
         <el-table-column prop="operation" align='center' label="操作" width="250">
             <template slot-scope='scope'>
-                <el-button type="primary" size ="mini" icon="view" >备考考生id</el-button>
-                <el-button type="warning" icon='edit' size="mini" >编辑</el-button>
-                <el-button type="danger" icon='delete' size="mini" >删除</el-button>
+                <el-button type="warning" icon='edit' size="mini" @click='onEditExam(scope.row.examid)'>编辑</el-button>
+                <el-button type="danger" icon='delete' size="mini" @click='removeExam(scope.row.examid)'>删除</el-button>
             </template>
         </el-table-column>
      </el-table>
@@ -121,49 +117,53 @@
                 width="30%"
                 :before-close="handleClose">
             <section class="update">
-                <el-form ref="form" :model="formData" label-width="90px">
-                    <el-form-item label="考试编号">
-                        <el-input v-model="formData.examid" :disabled="true"></el-input>
+                <el-form ref="form" :model="form" label-width="90px">
+                    <el-form-item label="考试编号：">
+                        <el-input v-model="form.examid" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="试卷编号">
-                        <el-input v-model="formData.paperid" :disabled="true"></el-input>
+                    <el-form-item label="试卷编号：">
+                        <el-input v-model="form.paperid" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="所属课程">
-                        <el-input v-model="formData.course.couname" :disabled="true"></el-input>
+                    <el-form-item label="所属课程：">
+                        <el-input v-model="form.course.couname" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="备考考生">
-                        <el-input v-model="formData.stuid" ></el-input>
+                    <el-form-item  label="所属院系：">
+                        <el-select v-model="InstituValue" @change="handleChange" placeholder="请选择学院">
+                            <el-option
+                                    v-for="item in Institutions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
-                    <el-form-item label="年级">
-                        <el-input v-model="formData.grade"></el-input>
+                    <el-form-item label="备考专业：">
+                        <el-select v-model="form.major.major"  :placeholder="InstituHolder" @change="change()">
+                            <el-option
+                                    v-for="item in Majors"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
-                    <el-form-item label="学期">
-                        <el-input v-model="formData.grade"></el-input>
+                    <el-form-item label="年级：">
+                        <el-input v-model="form.grade"></el-input>
                     </el-form-item>
-                    <el-form-item label="年级">
-                        <el-input v-model="formData.grade"></el-input>
+                    <el-form-item label="学期：">
+                        <el-input v-model="form.term"></el-input>
                     </el-form-item>
-                    <el-form-item label="年级">
-                        <el-input v-model="formData.grade"></el-input>
+                    <el-form-item label="考试时长：">
+                        <el-input v-model="form.extime"></el-input>
                     </el-form-item>
-                    <el-form-item label="年级">
-                        <el-input v-model="formData.grade"></el-input>
+                    <el-form-item label="考试日期：">
+                        <el-col :span="11">
+                            <el-date-picker type="date" placeholder="选择日期" format="yyyy-MM-dd"
+                                            v-model="form.exdate" style="width: 100%;"></el-date-picker>
+                        </el-col>
                     </el-form-item>
-                    <el-form-item :key="index"
-                                  :label="domain.quesname+'数量'"
-                                  v-if="domain.quesname!=null||look"
-                                  :rules="rules"
-                                  :disabled="true"
-                                  v-for="(domain,index) in formData.quesNumberList">
-                        <el-input   type="money"
-                                    :disabled="true"
-                                    v-if="domain.questypenum!==''||look"
-                                    autocomplete="off"
-                                    v-model.number="domain.questypenum">
-                        </el-input>
-                    </el-form-item>
-                    <el-form-item label="试卷描述">
-                        <el-input type="textarea" rows="1" resize="none" v-model="formData.description":disabled="look"></el-input>
+                    <el-form-item label="考试介绍：">
+                        <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
                     </el-form-item>
                 </el-form>
             </section>
@@ -179,19 +179,75 @@
     export default {
         data() {
             return {
+                Institutions:[],//学院下拉框
+                InstituValue: '',
+                Majors:[],//专业下拉框
+                majorValue: '',
+                InstituHolder:'',
                 tableData: null,
-                courses: [],
-                value: '',
+                sort: 'createAt',
+                order: 'descending',
+                sels: [],//选中显示的值
+                disabled:true,
+                loading:true,
+                idFlag:false,
+                add:false,//用于添加时的条件判断
+                edit:true,//用于添加时的条件判断
+                pagination: {
+                    //分页后的考试信息
+                    current: 1, //当前页
+                    total: null, //记录条数
+                    size: 6, //每页条数
+                },
+                dialogVisible: false, //对话框
                 search:'',//用于模糊搜索
+                form:{
+                    examid:'',
+                    paperid:'',
+                    courseid:'',
+                    grade:'',
+                    term:'',
+                    majorid:'',
+                    institutionid:'',
+                    extime:'',
+                    exdate:'',
+                    description:'',
+                    isExam:'',
+                    course:{
+                        courseid:'',
+                        couname:'',
+                        institutionid:'',
+                    },
+                    major:{
+                        majorid:'',
+                        major:'',
+                        institutionid:'',
+                    },
+                    institution:{
+                        institutionid:'',
+                        instuname:'',
+                    }
+                },
+                checkDate:'',
             }
         },
         created() {
-            // this.getExamInfo();
-            this.getCourseInfo();
+            this.getExamInfo();
+            this.getInstitution2();//获取学院
+            this.getMajor();  //获取专业
         },
         computed:{
         },
         methods: {
+            getExamInfo(){
+                //分页查询所有班级信息
+                this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
+                    this.pagination = res.data.data;
+                    this.loading = false;
+                    this.tableData=[];
+                    this.tableData = this.pagination.records;
+                }).catch(error => {});
+            },
             async getCourseInfo() {
                 //不分页查询所有课程信息
                 this.$axios(`/api/courseInfo`).then(res => {
@@ -202,15 +258,127 @@
                     this.courses.push({label:"所有课程试卷",value:0});
                 }).catch(error => {});
             },
+            getInstitution2(){
+                //不分页查询所有学院信息
+                this.$axios(`/api/institution/selectAll`).then(res => {
+                    this.loading = false;
+                    this.Institutions=[];
+                    res.data.data.forEach(element => {
+                        this.Institutions.push({label:element.instituname,value:element.institutionid});
+                    })
+                }).catch(error => {});
+            },
+            getMajor(){
+                //不分页查询所有专业信息
+                this.$axios(`/api/major/selectAll`).then(res => {
+                    this.loading = false;
+                    res.data.data.forEach(element => {
+                        this.majors.push({label:element.major,value:element.majorid});
+                        this.Majors.push({label:element.major,value:element.majorid});
+                    })
+                    this.majors.push({label:"所有专业",value:0});
+                    this.instituHolder="请选择专业";
+                }).catch(error => {});
+            },
+            //获取下拉框中的值
+            handleChange(val){
+                //传进来的val是select组件选中的value值
+                let obj = {}; //用来存储下拉框中的对象
+                obj = this.Institutions.find((item) => {
+                    return item.value === val;
+                });
+                this.$axios(`/api/major/selectInstitu/${val}`).then(res => {
+                    this.Majors = [];
+                    this.InstituHolder = "请选择";
+                    if (res.data.data.length > 0) {
+                        res.data.data.forEach(element => {
+                            this.Majors.push({label: element.major, value: element.majorid});
+                        })
+                        this.loading = false;
+                        this.form.major.major=this.Majors[0].label
+                        /* this.form.majorid = ''*/
+                    } else {
+                        this.form.major.major = ''
+                        this.InstituHolder = "该院系下目前未设专业";
+                    }
+                })
+            },
+            change(val){
+                this.$forceUpdate()
+            },
             //改变当前记录条数
             handleSizeChange(val) {
                 this.pagination.size = val;
-                this.getPaperInfo();
+                this.getExamInfo();
             },
             //改变当前页码，重新发送请求
             handleCurrentChange(val) {
                 this.pagination.current = val;
-                this.getPaperInfo();
+                this.getExamInfo();
+            },
+            // 编辑操作方法
+            onEditExam(examId) { //修改课程信息
+                this.dialogVisible = true
+                this.$axios(`/api/exam/selectById/${examId}`).then(res => {
+                    this.form = res.data.data
+                    this.checkDate=this.form.exdate;
+                })
+            },
+            formatTime(date) { //日期格式化
+                let year = date.getFullYear()
+                let month= date.getMonth()+ 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+                let day=date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+                let hours=date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+                let minutes=date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+                let seconds=date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+                // 拼接
+                return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+            },
+            submit() { //提交更改
+                if(this.checkDate!=this.form.exdate) {
+                    let examDate = this.formatTime(this.form.exdate)
+                    this.form.exdate = examDate.substr(0, 10)
+                }
+                this.dialogVisible = false
+                    this.$axios({
+                        url: '/api/exam/update',
+                        method: 'put',
+                        data: {
+                            ...this.form
+                        }
+                    }).then(res => {
+                        console.log(res)
+                        if(res.data.code ==200) {
+                            this.$message({
+                                message: '更新成功',
+                                type: 'success'
+                            })
+                        }
+                        this.getExamInfo();
+                })
+            },
+            handleClose(done) { //关闭提醒
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    }).catch(_ => {});
+            },
+            //删除操作方法
+            removeExam(examId) { //删除当前班级
+                this.$confirm('确认删除该记录吗?', '提示').then(() => {
+                    this.$axios({
+                        url: `/api/exam/delete/${examId}`,
+                        method: 'delete',
+                    }).then(res => {
+                        // console.log(res);
+                        this.$message({
+                            message: res.data.message,
+                            type: 'success'
+                        })
+                        this.getExamInfo();
+                        this.pagination.current=1
+                    })
+                }).catch(() => {})
             },
             selsChange(sels) {
                 //被选中的行组成数组
@@ -221,28 +389,29 @@
                     this.disabled = false;
                 }
             },
-            //获取下拉框中的值
-            handleChange(val){
-                //传进来的val是select组件选中的value值
-                let obj = {}; //用来存储下拉框中的对象
-                obj = this.courses.find((item)=>{
-                    return item.value === val;
-                });
-                //obj 就是被选中的那个对象，也就能拿到label值了。
-                console.log(obj.label)//label值
-                console.log(obj.value)//value值
-                if(val==0){
-                    this.getPaperInfo();
-                }else {
-                    this.$axios(`/api/paper_courseid/${val}`).then(res => {
-                        this.pagination.total = res.data.data.length;
-                        this.tableData = [];
-                        for (var i = 0; i < res.data.data.length; i++) {
-                            this.tableData.push(res.data.data[i]);
-                        }
-                        this.loading = false;
+            //批量删除
+            onBatchDelExam(rows){
+                var ids = [];
+                rows.forEach(element =>{
+                    ids.push(element.examid)
+                    console.log("====="+element.examid);
+                })
+                const param = ids.join(','); // 把数组项拼接成字符串，以逗号,分隔
+                this.$confirm('确定要删除选中的文件吗?','提示').then(() =>{
+                    this.$axios({
+                        url: `/api/exam/deleteByIds/${param}`,
+                        method: 'delete',
+                    }).then(res => {
+                        console.log(ids.examid);
+                        this.$message({
+                            message: '删除成功',
+                            type: 'success'
+                        })
+                        console.log("====="+ids);
+                        this.getExamInfo();
+                        this.pagination.current=1
                     })
-                }
+                }).catch(() => {})
             },
         },
         computed: {

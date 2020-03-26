@@ -87,9 +87,10 @@
     }
     .el-menu-vertical-demo:not(.el-menu--collapse) {
         min-height: 900px;
+
     }
     #left {
-        height: 900px;
+        height: 100%;
         background-color: #000000;
         z-index: 0;
     }
