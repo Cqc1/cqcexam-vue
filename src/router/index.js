@@ -17,27 +17,24 @@ const routes = [
         path: '/', //首页默认路由
         component: () => import('@/components/common/hello')
       },
-      // {
-      //   path:'/grade', //学生成绩
-      //   component: () => import('@/components/charts/grade')
-      // },
-      // {
-      //   path: '/selectExamToPart', //学生分数段
-      //   component: () => import('@/components/teacher/selectExamToPart')
-      // },
-      // {
-      //   path: '/scorePart',
-      //   component: () => import('@/components/charts/scorePart')
-      // },
-      // {
-      //   path: '/allStudentsGrade', //所有学生成绩统计
-      //   component: () => import('@/components/teacher/allStudentsGrade')
-      // },
-       /* 考试管理模块*/
+       /* 成绩管理模块*/
       {
-        path: '/examDescription', //考试管理功能描述
-        component: () => import('@/components/teacher/examDescription')
+        path:'/grade', //学生成绩
+        component: () => import('@/components/charts/grade')
       },
+      {
+        path: '/selectExamToPart', //学生分数段
+        component: () => import('@/components/teacher/selectExamToPart')
+      },
+      {
+        path: '/scorePart',
+        component: () => import('@/components/charts/scorePart')
+      },
+      {
+        path: '/allStudentsGrade', //所有学生成绩统计
+        component: () => import('@/components/teacher/allStudentsGrade')
+      },
+       /* 考试管理模块*/
       {
         path: '/examManage', //查询所有考试
         component: () => import('@/components/teacher/examManage')

@@ -47,8 +47,11 @@
                     <el-form-item label="学期：">
                         <span>{{ props.row.term }}</span>
                     </el-form-item>
-                    <el-form-item label="专业：">
+                    <el-form-item label="所属专业：">
                         <span>{{ props.row.major.major }}</span>
+                    </el-form-item>
+                    <el-form-item label="备考[院系,专业]编号：">
+                        <span>{{ props.row.majors }}</span>
                     </el-form-item>
                     <el-form-item label="学院：">
                         <span>{{ props.row.institution.instituname}}</span>
@@ -137,7 +140,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="备考专业：">
+                    <el-form-item label="所属专业：">
                         <el-select v-model="form.major.major"  :placeholder="InstituHolder" @change="change()">
                             <el-option
                                     v-for="item in Majors"
@@ -146,6 +149,17 @@
                                     :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item>
+                    <el-form-item  label="备考专业">
+                        <div class="block">
+                            <el-cascader
+                                    v-model="form.majorsId" placeholder="请选择学院专业" ref="Cascader"
+                                    :options="institutionList" separator="/"
+                                    :props="majorrop" expand-trigger="hover"
+                                    @change="MajorsChange"
+                                    clearable>
+                            </el-cascader>
+                        </div>
                     </el-form-item>
                     <el-form-item label="年级：">
                         <el-input v-model="form.grade"></el-input>
@@ -177,8 +191,30 @@
 </template>
 <script>
     export default {
+        props: {
+            majorsId: {
+                type: Array,
+                default() {
+                    return []
+                }
+            }
+        },
         data() {
             return {
+                majorrop: {
+                    multiple: true,
+                    label: 'label',
+                    value: 'value',
+                    children: 'labelsList'
+                },
+                institutionList: [/*{
+                    institutionid:'',
+                    instituname:'',
+                    majors: {
+                        majorid: '',
+                        major: '',
+                    }
+                }*/],
                 Institutions:[],//学院下拉框
                 InstituValue: '',
                 Majors:[],//专业下拉框
@@ -207,7 +243,9 @@
                     courseid:'',
                     grade:'',
                     term:'',
+                    majors:'',
                     majorid:'',
+                    majorsId:[],
                     institutionid:'',
                     extime:'',
                     exdate:'',
@@ -229,6 +267,7 @@
                     }
                 },
                 checkDate:'',
+                objarr:[],
             }
         },
         created() {
@@ -303,6 +342,67 @@
                     }
                 })
             },
+            getTreeData(data) {
+                // 循环遍历json数据
+                for (var i = 0; i < data.length; i++) {
+                    data[i].disabled=false;
+                    if (data[i].labelsList==null||data[i].labelsList.length < 1) {
+                        // children若为空数组，则将children设为undefined
+                        data[i].disabled=true;
+                        data[i].labelsList = undefined;
+                    } /*else {
+                        // children若不为空数组，则继续 递归调用 本方法
+                        this.getTreeData(data[i].institunames);
+                    }*/
+                }
+                return data;
+            },
+            MajorsChange(value){    //获取级联数据
+                /* this.$emit("changeMajorTree",value)*/
+                console.log(this.form.majorsId)
+                // 获取value值
+                console.log(value)
+               /* this.arrToStr( this.form.majorsId )*/
+            },
+            arrToStr( objarr ){
+                var arrLen = objarr.length;
+                var row = "[";
+                for (var i = 0 ;i < arrLen ; i++){
+                    row += "[";
+                    for(var j = 0; j < objarr[i].length; j++){
+                        row += objarr[i][j];
+                        if(j < objarr[i].length-1){
+                            row +=",";
+                        }
+                    }
+                    row += "]";
+                    if(i<arrLen-1){
+                        row+=",";
+                    }
+                }
+                row+="]";
+                return row;
+            },
+          getInstituAndMajor(){
+                //不分页级联获取院系和专业
+                this.$axios(`/api/institution/selectAllMajor`).then(res => {
+                    this.loading = false;
+                    this.institutionList=[];
+                    this.institutionList=res.data.data;
+                    console.log(this.institutionList)
+                    //获取用户所拥有的系统
+                    //element框架级联要求，层级的key需一样，用props绑定，变成json字符串，全局替换单词为另一个
+                    let str = JSON.stringify(res.data.data).replace(/institutionid/g,'value').replace(/instituname/g,'label')
+                        .replace(/majorid/g,'value')
+                        .replace(/major/g,'label')
+                    /*.replace(/majorsList/g,'children')*/
+                    this.institutionList = JSON.parse(str)
+                    console.log(this.institutionList)
+                    this.institutionList=this.getTreeData(this.institutionList);
+                    console.log(this.institutionList)
+                }).catch(error => {
+                });
+            },
             change(val){
                 this.$forceUpdate()
             },
@@ -323,6 +423,8 @@
                     this.form = res.data.data
                     this.checkDate=this.form.exdate;
                 })
+                this.getInstituAndMajor();
+                this.form.majorsId=eval(this.form.majors);
             },
             formatTime(date) { //日期格式化
                 let year = date.getFullYear()
@@ -340,6 +442,7 @@
                     this.form.exdate = examDate.substr(0, 10)
                 }
                 this.dialogVisible = false
+                this.form.majors=this.arrToStr(this.form.majorsId);
                     this.$axios({
                         url: '/api/exam/update',
                         method: 'put',
@@ -415,6 +518,10 @@
             },
         },
         computed: {
+            /*majorsId(){
+                this.majorsId=eval(this.form.majors)
+                return this.majorsId
+            },*/
             // 模糊搜索
             tables() {
                 const search = this.search;

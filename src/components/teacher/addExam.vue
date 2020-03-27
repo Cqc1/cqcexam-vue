@@ -1,8 +1,8 @@
 <!-- 添加考试 -->
 <template>
     <section class="add">
-        <el-form ref="form" :model="form" label-width="80px">
-            <el-form-item  label="所属院系">
+        <el-form ref="form" :rules="rules" :model="form" label-width="100px">
+            <el-form-item  prop="institutionid" label="所属院系：">
                 <el-select v-model="form.institutionid" @change="handleChange1" placeholder="请选择学院">
                     <el-option
                             v-for="item in Institutions"
@@ -12,7 +12,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item  label="所属课程">
+            <el-form-item prop="courseid" label="所属课程：">
                 <el-select v-model="form.courseid" @change="handleChange2" :placeholder="placeholder">
                     <el-option
                             v-for="item in Courses"
@@ -22,7 +22,17 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item  label="试卷选择">
+            <el-form-item prop="majorid" label="所属专业：">
+                <el-select v-model="form.majorid"  :placeholder="InstituHolder" @change="change()">
+                    <el-option
+                            v-for="item in Majors"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item prop="paperid" label="试卷选择">
                 <el-select v-model="form.paperid" @change="change" :placeholder="placeholder2">
                     <el-option
                             v-for="item in Papers"
@@ -32,52 +42,37 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item  label="备考专业">
+            <el-form-item prop="majorsId" label="备考专业：">
                 <div class="block">
                     <el-cascader
                             v-model="form.majorsId" placeholder="请选择学院专业" ref="Cascader"
                             :options="institutionList" separator="/"
                             :props="majorrop" expand-trigger="hover"
                             @change="MajorsChange"
-
                             clearable>
                     </el-cascader>
                 </div>
             </el-form-item>
-            <el-form-item label="试卷名称">
-                <el-input v-model="form.source"></el-input>
-            </el-form-item>
-            <el-form-item label="介绍">
-                <el-input v-model="form.description"></el-input>
-            </el-form-item>
-            <el-form-item label="所属学院">
-                <el-input v-model="form.institute"></el-input>
-            </el-form-item>
-            <el-form-item label="所属专业">
-                <el-input v-model="form.major"></el-input>
-            </el-form-item>
-            <el-form-item label="年级">
+            <el-form-item prop="grade" label="年级：">
                 <el-input v-model="form.grade"></el-input>
             </el-form-item>
-            <el-form-item label="考试日期">
+            <el-form-item prop="term" label="学期：">
+                <el-input v-model="form.term"></el-input>
+            </el-form-item>
+            <el-form-item prop="extime" label="考试时长：">
+                <el-input v-model.number="form.extime"></el-input>
+            </el-form-item>
+            <el-form-item prop="exdate" label="考试日期：">
                 <el-col :span="11">
-                    <el-date-picker placeholder="选择日期" v-model="form.examDate" style="width: 100%;"></el-date-picker>
+                    <el-date-picker type="date" placeholder="选择日期" format="yyyy-MM-dd"
+                                    v-model="form.exdate" style="width: 100%;"></el-date-picker>
                 </el-col>
             </el-form-item>
-            <el-form-item label="持续时间">
-                <el-input v-model="form.totalTime"></el-input>
-            </el-form-item>
-            <el-form-item label="总分">
-                <el-input v-model="form.totalScore"></el-input>
-            </el-form-item>
-            <el-form-item label="考试类型">
-                <el-input v-model="form.type"></el-input>
-            </el-form-item>
-            <el-form-item label="考生提示">
-                <el-input type="textarea" v-model="form.tips"></el-input>
+            <el-form-item prop="description" label="考试介绍：">
+                <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="onSubmit()">立即创建</el-button>
+                <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
                 <el-button type="text" @click="cancel()">取消</el-button>
             </el-form-item>
         </el-form>
@@ -96,65 +91,75 @@
         },
         data() {
             return {
-                form: { //表单数据初始化
-                    source: null,
-                    description: null,
-                    institute: null,
-                    major: null,
-                    grade: null,
-                    examDate: null,
-                    totalTime: null,
-                    totalScore: null,
-                    type: null,
-                    tips: null,
-                    paperId: null,
-                    majorsId:{}
+                Majors:[],//专业下拉框
+                majorValue: '',
+                InstituHolder:'',
+                form:{
+                    examid:'',
+                    paperid:'',
+                    courseid:'',
+                    grade:'',
+                    term:'',
+                    majors:'',
+                    majorid:'',
+                    majorsId:[],
+                    institutionid:'',
+                    extime:'',
+                    exdate:'',
+                    description:'',
+                    isExam:'',
+                    course:{
+                        courseid:'',
+                        couname:'',
+                        institutionid:'',
+                    },
+                    major:{
+                        majorid:'',
+                        major:'',
+                        institutionid:'',
+                    },
+                    institution:{
+                        institutionid:'',
+                        instuname:'',
+                    }
+                },
+                rules: {
+                    institutionid: [
+                        { required: true, message: '请选择所属院系', trigger: 'blur' },
+                    ],
+                    courseid: [
+                        { required: true, message: '请选择所属课程', trigger: 'blur' },
+                    ],
+                    majorid: [
+                        { required: true, message: '请选择所属专业', trigger: 'blur' },
+                    ],
+                    paperid: [
+                        { required: true, message: '请选择试卷', trigger: 'blur' },
+                    ],
+                    grade: [
+                        { required: true, message: '请输入年级', trigger: 'blur' },
+                    ],
+                    term: [
+                        { required: true, message: '请输入学期', trigger: 'blur' },
+                    ],
+                    extime: [
+                        { required: true, message: '请输入考试时长,单位为分钟', trigger: 'blur' },
+                        { min: 3,type: 'number', message: '请输入大于0数字', trigger: 'blur' },
+                    ],
+                    exdate: [
+                        { required: true, message: '请选择考试日期', trigger: 'blur' },
+                    ],
+                    description: [
+                        { required: true, message: '请选择考试介绍', trigger: 'blur' },
+                    ],
                 },
                 majorrop: {
                     multiple: true,
-                    label: 'instituname',
-                    value: 'institutionid',
-                    children: 'institunames'
-                    /*lazy: true,
-                    lazyLoad(node, resolve) {
-                        setTimeout(() => {
-                            if (node.level == 0) {
-                                this.$axios.get(`/api/institution/selectAll`).then(response => {
-                                    const institutions = response.data.map((value, i) => ({
-                                        value: value.institutionsid,
-                                        label: value.instituname,
-                                        leaf: node.level >= 2
-                                    }));
-                                    resolve(institutions);
-                                });
-                            }
-                            if (node.level == 1) {
-                                this.$axios.get(`/api/major/selectInstitu/${node.value}`).then(response => {
-                                    const majors = response.data.map((value, i) => ({
-                                        value: value.majorid,
-                                        label: value.major,
-                                        leaf: node.level >= 2
-                                    }));
-                                    resolve(majors);
-                                });
-                            }
-                            }, 100);
-                    }*/
-
-
+                    label: 'label',
+                    value: 'value',
+                    children: 'labelsList'
                 },
-                institutionList: [/*{
-                    institutionid:'',
-                    instituname:'',
-                    majors: {
-                        majorid: '',
-                        major: '',
-                    }
-                }*/],
-                /*majors:{
-                    label:'majorid',
-                    value:'major',
-                },*/
+                institutionList: [],
                 Institutions: [],
                 placeholder:'',
                 placeholder2:'',
@@ -164,10 +169,29 @@
         },
         created() {
             this.getInstitution();//获取学院
+            this.getInstituAndMajor();
         },
         methods: {
+            getTreeData(data) {
+                // 循环遍历json数据
+                for (var i = 0; i < data.length; i++) {
+                    data[i].disabled=false;
+                    if (data[i].labelsList==null||data[i].labelsList.length < 1) {
+                          // children若为空数组，则将children设为undefined
+                          data[i].disabled=true;
+                          data[i].labelsList = undefined;
+                    } /*else {
+                        // children若不为空数组，则继续 递归调用 本方法
+                        this.getTreeData(data[i].institunames);
+                    }*/
+                }
+                return data;
+            },
             MajorsChange(value){
-                this.$emit("changeMajorTree",value)
+                /* this.$emit("changeMajorTree",value)*/
+                console.log(this.form.majorsId)
+                // 获取value值
+                console.log(value)
             },
             getInstituAndMajor(){
                 //不分页级联获取院系和专业
@@ -175,12 +199,16 @@
                     this.loading = false;
                     this.institutionList=[];
                     this.institutionList=res.data.data;
-                    /*console.log(this.institutionList)*/
+                    console.log(this.institutionList)
                     //获取用户所拥有的系统
                     //element框架级联要求，层级的key需一样，用props绑定，变成json字符串，全局替换单词为另一个
-                    let str = JSON.stringify(res.data.data).replace(/majorid/g,'institutionid')
-                    str = str.replace(/major/g,'instituname')
+                    let str = JSON.stringify(res.data.data).replace(/institutionid/g,'value').replace(/instituname/g,'label')
+                        .replace(/majorid/g,'value')
+                        .replace(/major/g,'label')
+                        /*.replace(/majorsList/g,'children')*/
                     this.institutionList = JSON.parse(str)
+                    console.log(this.institutionList)
+                    this.institutionList=this.getTreeData(this.institutionList);
                     console.log(this.institutionList)
                 }).catch(error => {
                 });
@@ -220,6 +248,21 @@
                         this.InstituHolder = "该院系下目前未设课程";
                     }
                 })
+                this.$axios(`/api/major/selectInstitu/${val}`).then(res => {
+                    this.Majors = [];
+                    this.InstituHolder = "请选择";
+                    if (res.data.data.length > 0) {
+                        res.data.data.forEach(element => {
+                            this.Majors.push({label: element.major, value: element.majorid});
+                        })
+                        this.loading = false;
+                        this.form.major.major=this.Majors[0].label
+                        /* this.form.majorid = ''*/
+                    } else {
+                        this.form.major.major = ''
+                        this.InstituHolder = "该院系下目前未设专业";
+                    }
+                })
             },
             //获取下拉框中的值
             handleChange2(val){
@@ -240,7 +283,7 @@
                                 this.Papers.push({label: element.description, value: element.paperid});
                             })
                             this.loading = false;
-                            this.form.paperid = this.Papers[0].label
+                            this.form.paperid = this.Papers[0].paperid
                             /* this.form.majorid = ''*/
                         } else {
                             this.form.paperid = ''
@@ -257,6 +300,21 @@
             change(){
                 this.$forceUpdate()
             },
+            getTreeData(data) {
+                // 循环遍历json数据
+                for (var i = 0; i < data.length; i++) {
+                    data[i].disabled=false;
+                    if (data[i].labelsList==null||data[i].labelsList.length < 1) {
+                        // children若为空数组，则将children设为undefined
+                        data[i].disabled=true;
+                        data[i].labelsList = undefined;
+                    } /*else {
+                        // children若不为空数组，则继续 递归调用 本方法
+                        this.getTreeData(data[i].institunames);
+                    }*/
+                }
+                return data;
+            },
             formatTime(date) { //日期格式化
                 let year = date.getFullYear()
                 let month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
@@ -267,89 +325,62 @@
                 // 拼接
                 return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
             },
-            onSubmit() {
-                let examDate = this.formatTime(this.form.examDate)
-                this.form.examDate = examDate.substr(0, 10)
-                this.$axios(`/api/examManagePaperId`).then(res => {
-                    this.form.paperId = res.data.data.paperId + 1 //实现paperId自增1
-                    this.$axios({
-                        url: '/api/exam',
-                        method: 'post',
-                        data: {
-                            ...this.form
+            arrToStr( objarr ){// 将二维数组转换为字符串
+                var arrLen = objarr.length;
+                var row = "[";
+                for (var i = 0 ;i < arrLen ; i++){
+                    row += "[";
+                    for(var j = 0; j < objarr[i].length; j++){
+                        row += objarr[i][j];
+                        if(j < objarr[i].length-1){
+                            row +=",";
                         }
-                    }).then(res => {
-                        if (res.data.code == 200) {
-                            this.$message({
-                                message: '数据添加成功',
-                                type: 'success'
+                    }
+                    row += "]";
+                    if(i<arrLen-1){
+                        row+=",";
+                    }
+                }
+                row+="]";
+                return row;
+            },
+            onSubmit(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        let examDate = this.formatTime(this.form.exdate)
+                        this.form.exdate = examDate.substr(0, 10)
+                        this.form.majors=this.arrToStr(this.form.majorsId);
+                        this.$axios(`/api/exam/OnlyExamId`).then(res => {
+                            this.form.examId = res.data.data.examId + 1 //实现examId自增1
+                            this.$axios({
+                                url: '/api/exam/add',
+                                method: 'post',
+                                data: {
+                                    ...this.form
+                                }
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    this.$message({
+                                        message: '新增考试成功',
+                                        type: 'success'
+                                    })
+                                    this.$router.push({path: '/examManage'})
+                                }else{
+                                    this.$message({
+                                        message: res.data.message,
+                                        type: 'error'
+                                    })
+                                }
                             })
-                            this.$router.push({path: '/selectExam'})
-                        }
-                    })
+                        })
+                    }
                 })
             },
             cancel() { //取消按钮
                 this.form = {}
             },
 
-
-            formatCC() {
-                let htmladd = document.createElement("bottom");
-                htmladd.innerHTML = "确认";
-                htmladd.className = "htmladd";
-                htmladd.style.cssText =
-                    "cursor: pointer;position: absolute;bottom: -35px;height: 35px;line-height:35px;width:100%;background:#fff;text-align: center;color:#606266;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);";
-                let that = this;
-                var el_l = document.querySelectorAll(".el-popper.el-cascader__dropdown.ticket_ccCascader");
-                if (el_l.length > 0 && el_l.length == 1) {
-                    var el = el_l[0];
-                    if (!el.querySelector(".htmladd")) {
-                        el.appendChild(htmladd);
-                        var bo = el.querySelectorAll(".htmladd")[0];
-                        bo.onclick = function() {
-                            that.$refs.ccCascader.dropDownVisible = false;
-                            let params = {
-                                id: that.ticketObject.id,
-                                cc: that.ticketOrder.cc
-                            };
-                            that.$axios
-                                .put(that.$httpServer.updateTicketOrder, params)
-                                .then(res => {
-                                    if (res && res.data.code == "0") {
-                                        that.$message1({
-                                            message: "保存成功",
-                                            type: "success",
-                                            duration: 500
-                                        });
-                                        that.handleNodeClick(that.types, that.ticketObject.id);
-                                        that.getTicketsNum();
-                                    }
-                                });
-                        };
-                    }
-                }
-            },
         },
-        mounted() {
-            this.getInstituAndMajor();  //级联获取院系和专业
-            let that = this;
-            setInterval(function() {
-                document.querySelectorAll(".el-cascader-node__label").forEach(el => {
-                    el.onclick = function() {
-                        if (this.previousElementSibling) this.previousElementSibling.click();
-                    };
-                });
-            }, 1000);
-            this.$nextTick(function() {
-                that.formatCC();
-            });
-        },
-        updated() {
-            this.$nextTick(function() {
-                this.formatCC();
-            });
-        }
 
     };
 </script>
