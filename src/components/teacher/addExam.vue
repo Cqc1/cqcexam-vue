@@ -32,7 +32,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item prop="paperid" label="试卷选择">
+            <el-form-item prop="paperid" label="试卷选择：">
                 <el-select v-model="form.paperid" @change="change" :placeholder="placeholder2">
                     <el-option
                             v-for="item in Papers"
@@ -52,6 +52,9 @@
                             clearable>
                     </el-cascader>
                 </div>
+            </el-form-item>
+            <el-form-item prop="exname" label="考试名称：">
+                <el-input v-model="form.exname"></el-input>
             </el-form-item>
             <el-form-item prop="grade" label="年级：">
                 <el-input v-model="form.grade"></el-input>
@@ -135,6 +138,9 @@
                     ],
                     paperid: [
                         { required: true, message: '请选择试卷', trigger: 'blur' },
+                    ],
+                    exname: [
+                        { required: true, message: '请输入考试名称', trigger: 'blur' },
                     ],
                     grade: [
                         { required: true, message: '请输入年级', trigger: 'blur' },
@@ -327,7 +333,7 @@
             },
             arrToStr( objarr ){// 将二维数组转换为字符串
                 var arrLen = objarr.length;
-                var row = "[";
+                var row = "{";
                 for (var i = 0 ;i < arrLen ; i++){
                     row += "[";
                     for(var j = 0; j < objarr[i].length; j++){
@@ -341,7 +347,7 @@
                         row+=",";
                     }
                 }
-                row+="]";
+                row+="}";
                 return row;
             },
             onSubmit(form) {

@@ -29,7 +29,7 @@ const state = {
       index: '4',
       title: '成绩管理',
       icon: 'icon-performance',
-      content:[{item1:'学生成绩查询',path:'/allStudentsGrade'},{path: '/grade'},{item2: '成绩分段查询',path: '/selectExamToPart'},{path: '/scorePart'}],
+      content:[{item1:'学生成绩查询',path:'/allStudentsGrade'},{item2: '成绩统计查询',path: '/selectExamToPart'},{item2: '试卷批阅',path: '/paperReview'},{path: '/scorePart'}],
     },
     {
       index: '5',

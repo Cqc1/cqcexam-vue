@@ -90,7 +90,7 @@
 
     }
     #left {
-        height: 100%;
+        height: 900px;
         background-color: #000000;
         z-index: 0;
     }

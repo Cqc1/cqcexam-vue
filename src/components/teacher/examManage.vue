@@ -81,8 +81,8 @@
                 prop="course.couname">
         </el-table-column>
         <el-table-column
-                label="考试介绍"
-                prop="description">
+                label="考试名称"
+                prop="exname">
         </el-table-column>
         <el-table-column
                 label="所属学院"
@@ -95,6 +95,10 @@
         <el-table-column
                 label="考试日期"
                 prop="exdate">
+        </el-table-column>
+        <el-table-column
+                label="考试介绍"
+                prop="description">
         </el-table-column>
         <el-table-column prop="operation" align='center' label="操作" width="250">
             <template slot-scope='scope'>
@@ -129,6 +133,9 @@
                     </el-form-item>
                     <el-form-item label="所属课程：">
                         <el-input v-model="form.course.couname" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="考试名称：">
+                        <el-input v-model="form.exname" ></el-input>
                     </el-form-item>
                     <el-form-item  label="所属院系：">
                         <el-select v-model="InstituValue" @change="handleChange" placeholder="请选择学院">
@@ -239,6 +246,7 @@
                 search:'',//用于模糊搜索
                 form:{
                     examid:'',
+                    exname:'',
                     paperid:'',
                     courseid:'',
                     grade:'',
@@ -366,7 +374,7 @@
             },
             arrToStr( objarr ){
                 var arrLen = objarr.length;
-                var row = "[";
+                var row = "{";
                 for (var i = 0 ;i < arrLen ; i++){
                     row += "[";
                     for(var j = 0; j < objarr[i].length; j++){
@@ -380,7 +388,7 @@
                         row+=",";
                     }
                 }
-                row+="]";
+                row+="}";
                 return row;
             },
           getInstituAndMajor(){

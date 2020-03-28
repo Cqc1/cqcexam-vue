@@ -19,8 +19,8 @@ const routes = [
       },
        /* 成绩管理模块*/
       {
-        path:'/grade', //学生成绩
-        component: () => import('@/components/charts/grade')
+        path:'/paperReview', //成绩批阅
+        component: () => import('@/components/teacher/paperReview')
       },
       {
         path: '/selectExamToPart', //学生分数段
@@ -106,7 +106,21 @@ const routes = [
         component: () => import ('@/components/admin/classManage')
       },
     ]
-  }
+  },
+  {
+    path: '/student',
+    component: () => import('@/components/student/index'),
+    children: [
+      {path:"/",component: ()=> import('@/components/student/myExam')},
+      {path:'/startExam', component: () => import('@/components/student/startExam')},
+      {path: '/manager', component: () => import('@/components/student/manager')},
+      {path: '/examMsg', component: () => import('@/components/student/examMsg')},
+      {path: '/message', component: () => import('@/components/student/message')},
+      {path: '/studentScore', component: () => import("@/components/student/answerScore")},
+      {path: '/scoreTable', component: () => import("@/components/student/scoreTable")}
+    ]
+  },
+  {path: '/answer',component: () => import('@/components/student/answer')}
 ]
 
 const router = new VueRouter({

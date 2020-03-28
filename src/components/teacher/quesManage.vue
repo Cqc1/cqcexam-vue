@@ -58,6 +58,8 @@
                     align='center'
                     @selection-change="selsChange"
                     ref="table"
+                    border
+                    height="450"
                     stripe :default-sort="{prop: 'createAt', order: 'descending'}"
             >
                 <el-table-column v-if="idFlag" prop="quesid" label="quesid" align='center'>
