@@ -3,11 +3,11 @@
   <div id="msg">
     <div class="title">
       <span>试卷列表</span>
-      <span>/  {{examData.source}}</span>
+      <span>/  {{examData.exname}}</span>
     </div>
     <div class="wrapper">
       <ul class="top">
-        <li class="example">{{examData.source}}</li>
+        <li class="example">{{examData.exname}}</li>
         <li><i class="iconfont icon-pen-"></i></li>
         <li><i class="iconfont icon-share"></i></li>
         <li class="right">
@@ -18,10 +18,10 @@
         </li>
       </ul>
       <ul class="bottom">
-        <li>更新于{{examData.examDate}}</li>
-        <li>来自 {{examData.institute}}</li>
-        <li class="btn">{{examData.type}}</li>
-        <li class="right"><el-button @click="toAnswer(examData.examCode)">开始答题</el-button></li>
+        <li>更新于{{examData.exdate}}</li>
+        <li>来自 {{examData.institution.instituname}}</li>
+        <li class="btn">{{examData.course.couname}}</li>
+        <li class="right"><el-button @click="toAnswer(examData.examid)">开始答题</el-button></li>
       </ul>
       <ul class="info">
         <li @click="dialogVisible = true"><a href="javascript:;"><i class="iconfont icon-info"></i>考生须知</a></li>
@@ -32,8 +32,8 @@
         <el-collapse-item class="header" name="0">
           <template slot="title" class="stitle" >
             <div class="title">
-              <span>{{examData.source}}</span><i class="header-icon el-icon-info"></i>
-              <span class="time">{{examData.totalScore}}分 / {{examData.totalTime}}分钟</span>
+              <span>{{examData.exname}}</span><i class="header-icon el-icon-info"></i>
+              <span class="time">{{examData.paper.totalscore}}分 / {{examData.extime}}分钟</span>
               <el-button type="primary" size="small">点击查看试题详情</el-button>
             </div>
           </template>

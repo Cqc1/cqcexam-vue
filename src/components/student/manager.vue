@@ -2,7 +2,10 @@
 <template>
   <div id='manager'>
     <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
-      <h3 class="alter">修改你的密码</h3>
+      <h3 class="alter">修改密码</h3>
+        <el-form-item label="旧密码" prop="oldpass" class="pass">
+          <el-input type="password" v-model="ruleForm2.oldpass" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="密码" prop="pass" class="pass">
         <el-input type="password" v-model="ruleForm2.pass" autocomplete="off"></el-input>
       </el-form-item>
@@ -42,10 +45,14 @@
       return {
         ispass: true,
         ruleForm2: {
+          oldpass:'',
           pass: '',
           checkPass: ''
         },
         rules2: {
+          oldpass: [
+            { required: true, message: '请输入旧密码', trigger: 'blur' },
+          ],
           pass: [
             { validator: validatePass, trigger: 'blur' }
           ],
@@ -59,22 +66,35 @@
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            let studentId = this.$cookies.get("cid")
-            this.$axios({ //修改密码
-              url: '/api/studentPWD',
-              method: 'put',
-              data: {
-                pwd: this.ruleForm2.pass,
-                studentId
-              }
-            }).then(res => {
-              if(res.data != null ) { //修改成功提示
+            let stuid = this.$cookies.get("cid")
+            //按条件查询信息
+            this.$axios(`/api/student/${this.$cookies.get("cid")}`).then(res => {
+              if (this.ruleForm2.oldpass !== res.data.data.stupwd) {
                 this.$message({
-                  message: '密码修改成功...',
-                  type: 'success'
+                  message: '您输入的旧密码错误！',
+                  type: 'error'
+                })
+              }else{
+                this.$axios({ //修改密码
+                  url: '/api/studentPWD',
+                  method: 'put',
+                  data: {
+                    stupwd: this.ruleForm2.pass,
+                    stuid
+                  }
+                }).then(res => {
+                  if(res.data != null ) { //修改成功提示
+                    this.$message({
+                      message: res.data.message+'请重新登录！',
+                      type: 'success'
+                    })
+                  }
+                  this.$router.push({path:"/"}) //跳转到登录页面
+                  this.$cookies.remove("cname") //清除cookie
+                  this.$cookies.remove("cid")
                 })
               }
-            })
+            }).catch(error => {});
           } else {
             console.log('error submit!!');
             return false;

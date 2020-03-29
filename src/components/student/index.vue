@@ -4,10 +4,10 @@
     <el-row class="padding-50">
       <el-col :span="24">
         <ul class="list">
-          <li class="logo"><i class="iconfont icon-kaoshi"></i><span>Exam-Online</span></li>
-          <li><a href="javascript:;" @click="exam()">我的试卷</a></li>
-          <li><a href="javascript:;" @click="practice()">我的练习</a></li>
-          <li><router-link to="/scoreTable">我的分数</router-link></li>
+          <li class="logo"><i class="iconfont iconkaoshi"></i><span>CQC-OnlineExam</span></li>
+          <li><a href="javascript:;" @click="exam()">在线考试</a></li>
+          <li><a href="javascript:;" @click="practice()">在线练习</a></li>
+          <li><router-link to="/scoreTable">考试记录</router-link></li>
           <li><router-link to="/message">给我留言</router-link></li>
           <li><a href="javascript:;">待定</a></li>
           <li class="right" @mouseenter="flag = !flag" @mouseleave="flag = !flag">
@@ -86,7 +86,7 @@ export default {
   margin: 0 auto;
   padding: 0 50px;
   box-shadow: 0 0 10px 4px rgba(1,149,255,0.1);
-  background-color: #fff;
+  background-color: rgba(96, 96, 96, 0.47);
 }
 .list a {
   text-decoration: none;
@@ -109,7 +109,7 @@ li {
   transition: all 2s ease;
 }
 #student .list li:hover a {
-  color: #fff;
+  color: #ff8a1b;
 }
 #student .list .right {
   margin-left: auto;
@@ -135,7 +135,7 @@ li {
   flex-direction: column;
   border-radius: 2px;
   border-bottom: 3px solid #0195ff;
-  background-color: #fff;
+  background-color: #606060;
 }
 .right .msg p {
   height: 40px;

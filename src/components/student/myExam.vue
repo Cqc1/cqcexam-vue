@@ -5,17 +5,17 @@
     <div class="wrapper">
       <ul class="top">
         <li class="order">试卷列表</li>
-        <li class="search-li"><div class="icon"><input type="text" placeholder="试卷名称" class="search" v-model="key"><i class="el-icon-search"></i></div></li>
-        <li><el-button type="primary" @click="search()">搜索试卷</el-button></li>
+        <li class="search-li"><div class="icon"><input type="text" placeholder="考试名称" class="search" v-model="key"><i class="el-icon-search"></i></div></li>
+        <li><el-button type="primary" @click="search()">搜索考试</el-button></li>
       </ul>
       <ul class="paper" v-loading="loading">
         <li class="item" v-for="(item,index) in pagination.records" :key="index">
-          <h4 @click="toExamMsg(item.examCode)">{{item.source}}</h4>
-          <p class="name">{{item.source}}-{{item.description}}</p>
+          <h4 @click="toExamMsg(item.examid)">{{item.exname}}</h4>
+          <p class="name">{{item.exname}}-{{item.description}}</p>
           <div class="info">
-            <i class="el-icon-loading"></i><span>{{item.examDate.substr(0,10)}}</span>
-            <i class="iconfont icon-icon-time"></i><span v-if="item.totalTime != null">限时{{item.totalTime}}分钟</span>
-            <i class="iconfont icon-fenshu"></i><span>满分{{item.totalScore}}分</span>
+            <i class="el-icon-loading"></i><span>{{item.exdate.substr(0,10)}}</span>
+            <i class="iconfont icon-icon-time"></i><span v-if="item.extime != null">限时{{item.extime}}分钟</span>
+            <i class="iconfont icon-fenshu"></i><span>满分{{item.paper.totalscore}}分</span>
           </div>
         </li>
       </ul>
@@ -59,7 +59,7 @@ export default {
   methods: {
     //获取当前所有考试信息
     getExamInfo() {
-      this.$axios(`/api/exams/${this.pagination.current}/${this.pagination.size}`).then(res => {
+      this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
         this.pagination = res.data.data
         this.loading = false
         console.log(this.pagination)
@@ -79,20 +79,20 @@ export default {
     },
     //搜索试卷
     search() {
-      this.$axios('/api/exams').then(res => {
+      this.$axios('/api/exam/exams').then(res => {
         if(res.data.code == 200) {
           let allExam = res.data.data
           let newPage = allExam.filter(item => {
-            return item.source.includes(this.key)
+            return item.exname.includes(this.key)
           })
           this.pagination.records = newPage
         }
       })
     },
     //跳转到试卷详情页
-    toExamMsg(examCode) {
-      this.$router.push({path: '/examMsg', query: {examCode: examCode}})
-      console.log(examCode)
+    toExamMsg(examid) {
+      this.$router.push({path: '/examMsg', query: {examid: examid}})
+      console.log(examid)
     }
   }
 }
@@ -136,7 +136,7 @@ export default {
   width: 380px;
   border-radius: 4px;
   padding: 20px 30px;
-  border: 1px solid #eee;
+  border: 1px solid #606060;
   box-shadow: 0 0 4px 2px rgba(217,222,234,0.3);
   transition: all 0.6s ease;
 }
