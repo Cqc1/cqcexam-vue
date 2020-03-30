@@ -57,6 +57,19 @@ export default {
     
   // },
   methods: {
+    /*// 筛选
+    filters(tabledate) {
+      this.$axios(`/api/student/${this.$cookies.get("cid")}`).then(res => {
+        if (res.data.code == 200) {
+          var institutionid=res.data.data.institutionid
+          var majorid=res.data.data.majorid
+          let newData = tabledate.filter(item => {
+            return item.exname.includes('['+institutionid+','+majorid+']')
+          })
+          this.pagination.records = newData
+        }
+      })
+    },*/
     //获取当前所有考试信息
     getExamInfo() {
       this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
@@ -85,14 +98,38 @@ export default {
           let newPage = allExam.filter(item => {
             return item.exname.includes(this.key)
           })
+          console.log(newPage)
           this.pagination.records = newPage
+          this.pagination.total=newPage.length;
+          this.pagination.current=1;
         }
       })
     },
     //跳转到试卷详情页
     toExamMsg(examid) {
-      this.$router.push({path: '/examMsg', query: {examid: examid}})
-      console.log(examid)
+      this.$axios(`/api/student/${this.$cookies.get("cid")}`).then(res => {
+        if (res.data.code == 200) {
+          var institutionid=res.data.data.institutionid
+          var majorid=res.data.data.majorid
+          this.$axios(`/api/exam/selectById/${examid}`).then(res => {
+            var majors=res.data.data.majors;
+            if(majors.includes('['+institutionid+','+majorid+']')){
+              this.$router.push({path: '/examMsg', query: {examid: examid}})
+              console.log(examid)
+            }else{
+              this.$message({
+                message: '该考试暂不属于您的专业所考,您无法查看！',
+                type: 'warning'
+              })
+            }
+          })
+        }else{
+          this.$message({
+            message: res.data.message,
+            type: 'error'
+          })
+        }
+      })
     }
   }
 }

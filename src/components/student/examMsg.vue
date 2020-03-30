@@ -13,12 +13,12 @@
         <li class="right">
           <div>
             <span class="count">总分</span>
-            <span class="score">{{score[0]+score[1]+score[2]}}</span>
+            <span class="score">{{examData.paper.totalscore}}</span>
           </div>
         </li>
       </ul>
       <ul class="bottom">
-        <li>更新于{{examData.exdate}}</li>
+        <li>考试时间：{{examData.exdate}}</li>
         <li>来自 {{examData.institution.instituname}}</li>
         <li class="btn">{{examData.course.couname}}</li>
         <li class="right"><el-button @click="toAnswer(examData.examid)">开始答题</el-button></li>
@@ -38,35 +38,10 @@
             </div>
           </template>
           <el-collapse class="inner">
-            <el-collapse-item>
-              <template slot="title" name="1">
-                <div class="titlei">选择题 (共{{topicCount[0]}}题 共计{{score[0]}}分)</div>
+            <el-collapse-item v-for="item in topic.paperScores" >
+              <template slot="title" :name="item.questype">
+                <div class="titlei">{{item.quesname}} (共{{item.quesnum}}题  共计{{item.typescore}}分)</div>
               </template>
-              <div class="contenti">
-                <ul class="question" v-for="(list, index) in topic[1]" :key="index">
-                  <li>{{index+1}}. {{list.question}} {{list.score}}分</li>
-                </ul>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item>
-              <template slot="title" name="2">
-                <div class="titlei">填空题 (共{{topicCount[1]}}题  共计{{score[1]}}分)</div>
-              </template>
-              <div class="contenti">
-                <ul class="question" v-for="(list, index) in topic[2]" :key="index">
-                  <li>{{topicCount[0]+index+1}}.{{list.question}}  {{list.score}}分</li>
-                </ul>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item>
-              <template slot="title" name="3">
-                <div class="titlei">判断题 (共{{topicCount[2]}}题 共计{{score[2]}}分)</div>
-              </template>
-              <div class="contenti">
-                <ul class="question" v-for="(list, index) in topic[3]" :key="index">
-                  <li>{{topicCount[0]+topicCount[1]+index+1}}. {{list.question}} {{list.score}}分</li>
-                </ul>
-              </div>
             </el-collapse-item>
           </el-collapse>
         </el-collapse-item>
@@ -78,7 +53,7 @@
       title="考生须知"
       :visible.sync="dialogVisible"
       width="30%">
-      <span>{{examData.tips}}</span>
+      <span>{{examData.description}}</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">知道了</el-button>
       </span>
@@ -95,12 +70,16 @@ export default {
       topicCount: [],//每种类型题目的总数
       score: [],  //每种类型分数的总数
       examData: { //考试信息
+        institution:'',
+        course:'',
+        paper:'',
         // source: null,
         // totalScore: null,
       },
       topic: {  //试卷信息
-
+        paperScores:'',
       },
+      currentTime:'',
     }
   },
   mounted() {
@@ -109,28 +88,52 @@ export default {
   methods: {
     //初始化页面数据
     init() {
-      let examCode = this.$route.query.examCode //获取路由传递过来的试卷编号
-      this.$axios(`/api/exam/${examCode}`).then(res => {  //通过examCode请求试卷详细信息
-        res.data.data.examDate = res.data.data.examDate.substr(0,10)
+      let examCode = this.$route.query.examid //获取路由传递过来的试卷编号
+      this.$axios(`/api/exam/selectById/${examCode}`).then(res => {  //通过examCid请求试卷详细信息
+        res.data.data.exdate = res.data.data.exdate.substr(0,10)
         this.examData = { ...res.data.data}
-        let paperId = this.examData.paperId
-        this.$axios(`/api/paper/${paperId}`).then(res => {  //通过paperId获取试题题目信息
-          this.topic = {...res.data}
-          let keys = Object.keys(this.topic) //对象转数组
-          keys.forEach(e => {
-            let data = this.topic[e]
-            this.topicCount.push(data.length)
-            let currentScore = 0
-            for(let i = 0; i< data.length; i++) { //循环每种题型,计算出总分
-              currentScore += data[i].score
-            }
-            this.score.push(currentScore) //把每种题型总分存入score
-          })
+        let paperId = this.examData.paperid
+        this.$axios(`/api/que_paper/score/${paperId}`).then(res => {  //通过paperId获取试题题目信息
+          this.topic = {...res.data.data}
+          console.log(this.topic);
         })
       })
     },
+    format(date, fmt) {
+      let o = {
+        "M+": date.getMonth() + 1, //月份
+        "d+": date.getDate(), //日
+        "H+": date.getHours(), //小时
+        "m+": date.getMinutes(), //分
+        "s+": date.getSeconds(), //秒
+        "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+        "S": date.getMilliseconds() //毫秒
+      };
+      if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+      for (let k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+      return fmt;
+    },
     toAnswer(id) {
-      this.$router.push({path:"/answer",query:{examCode: id}})
+      this.currentTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+      let date = new Date(this.examData.exdate);
+      this.examData.exdate=this.format(date, "yyyy-MM-dd HH:mm:ss");
+      console.log(this.currentTime+"====="+this.examData.exdate);
+      if(this.currentTime>this.examData.exdate){
+        if(this.examData.isexam==0){
+          this.$router.push({path:"/answer",query:{examid: id}})
+        }else{
+          this.$message({
+            message: '该考试已经考过，不许重复考试！',
+            type: 'warning'
+          })
+        }
+      }else{
+        this.$message({
+          message: '还未到考试开始时间！',
+          type: 'warning'
+        })
+      }
     },
   }
 }

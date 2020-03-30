@@ -76,27 +76,27 @@
         </el-table-column>
         <el-table-column type="selection" align='center'>
         </el-table-column>
-        <el-table-column
+        <el-table-column align='center'
                 label="所属课程"
                 prop="course.couname">
         </el-table-column>
-        <el-table-column
+        <el-table-column align='center'
                 label="考试名称"
                 prop="exname">
         </el-table-column>
-        <el-table-column
+        <el-table-column align='center'
                 label="所属学院"
                 prop="institution.instituname">
         </el-table-column>
-        <el-table-column
+        <el-table-column align='center'
                 label="所属专业"
                 prop="major.major">
         </el-table-column>
-        <el-table-column
+        <el-table-column width="180" align='center'
                 label="考试日期"
                 prop="exdate">
         </el-table-column>
-        <el-table-column
+        <el-table-column align='center'
                 label="考试介绍"
                 prop="description">
         </el-table-column>
@@ -178,10 +178,15 @@
                         <el-input v-model="form.extime"></el-input>
                     </el-form-item>
                     <el-form-item label="考试日期：">
-                        <el-col :span="11">
+                        <!--<el-col :span="11">
                             <el-date-picker type="date" placeholder="选择日期" format="yyyy-MM-dd"
                                             v-model="form.exdate" style="width: 100%;"></el-date-picker>
-                        </el-col>
+                        </el-col>-->
+                        <el-date-picker
+                                v-model="form.exdate"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                        </el-date-picker>
                     </el-form-item>
                     <el-form-item label="考试介绍：">
                         <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
@@ -434,7 +439,7 @@
                 this.getInstituAndMajor();
                 this.form.majorsId=eval(this.form.majors);
             },
-            formatTime(date) { //日期格式化
+            /*formatTime(date) { //日期格式化
                 let year = date.getFullYear()
                 let month= date.getMonth()+ 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
                 let day=date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
@@ -443,11 +448,26 @@
                 let seconds=date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
                 // 拼接
                 return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+            },*/
+            format(date, fmt) {
+                let o = {
+                    "M+": date.getMonth() + 1, //月份
+                    "d+": date.getDate(), //日
+                    "H+": date.getHours(), //小时
+                    "m+": date.getMinutes(), //分
+                    "s+": date.getSeconds(), //秒
+                    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+                    "S": date.getMilliseconds() //毫秒
+                };
+                if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+                for (let k in o)
+                    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                return fmt;
             },
             submit() { //提交更改
                 if(this.checkDate!=this.form.exdate) {
-                    let examDate = this.formatTime(this.form.exdate)
-                    this.form.exdate = examDate.substr(0, 10)
+                    this.form.exdate = this.format(this.form.exdate,"yyyy-MM-dd HH:mm:ss")
+                    /*this.form.exdate = examDate.substr(0, 10)*/
                 }
                 this.dialogVisible = false
                 this.form.majors=this.arrToStr(this.form.majorsId);
