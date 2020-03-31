@@ -42,12 +42,13 @@
               <div class="item" v-for="item in paperScores">
                 <p>{{item.quesname}}部分</p>
                 <ul>
-                  <li v-for="(list, index1) in topic[item.questype]" :key="index1">
+                  <li v-for="(list, index) in topic[item.questype]" :key="index">
                     <a href="javascript:;"
-                       @click="change+item.questype(index1)"
-                       :class="{'border': index == index1 && currentType == item.questype,'bg': bg_flag && topic[item.questype][index1].isClick == true}">
-                      <span :class="{'mark': topic[item.questype][index1].isMark == true}"></span>
-                      {{index1+1}}
+                       @click="change(item.questype,index)"
+                       :class="{'border': Index == index && currentType == item.questype,'bg': bg_flag &&
+                        topic[item.questype][index].isClick == true}">
+                      <span :class="{'mark': topic[item.questype][index].isMark == true}"></span>
+                      {{index+1}}
                     </a>
                   </li>
                 </ul>
@@ -65,13 +66,13 @@
             <span>全卷共{{paperQuesNum}}题  <i class="iconfont icon-time"></i>倒计时：<b>{{time}}</b>分钟</span>
           </div>
           <div class="content">
-            <p class="topic"><span class="number">{{number}}</span>{{showQuestion}}</p>
+            <p class="topic"><el-tag type="success">{{number}} </el-tag> {{showQuestion}}  <span>{{"("+showScore+"分)"}}</span></p>
             <div v-if="currentType == 1">
-            <el-radio-group v-model="radio[index]" @change="getChangeLabel" >
-              <el-radio :label="1">{{showAnswer.optiona}}</el-radio>
-              <el-radio :label="2">{{showAnswer.optionb}}</el-radio>
-              <el-radio :label="3">{{showAnswer.optionc}}</el-radio>
-              <el-radio :label="4">{{showAnswer.optiond}}</el-radio>
+            <el-radio-group v-model="radio[singAnswer.quesid]" @change="getChangeLabel" >
+              <el-tag>A：<el-radio  label="A">{{singAnswer.optiona}}</el-radio></el-tag>
+              <el-tag>B：<el-radio  label="B">{{singAnswer.optionb}}</el-radio></el-tag>
+              <el-tag>C：<el-radio  label="C">{{singAnswer.optionc}}</el-radio></el-tag>
+              <el-tag>D：<el-radio  label="D">{{singAnswer.optiond}}</el-radio></el-tag>
             </el-radio-group>
             <div class="analysis" v-if="isPractice">
               <ul>
@@ -82,11 +83,11 @@
             </div>
           </div>
             <div v-if="currentType == 2">
-              <el-radio-group v-model="checkbox[index]" @change="getChangeLabel" >
-                <el-checkbox :label="1">{{showAnswer.optiona}}</el-checkbox>
-                <el-checkbox :label="2">{{showAnswer.optionb}}</el-checkbox>
-                <el-checkbox :label="3">{{showAnswer.optionc}}</el-checkbox>
-                <el-checkbox :label="4">{{showAnswer.optiond}}</el-checkbox>
+              <el-radio-group v-model="checkbox[multAnswer.quesid]" @change="getChangeLabe2" >
+                <el-tag>A：<el-checkbox label="A">{{multAnswer.optiona}}</el-checkbox></el-tag>
+                <el-tag>B：<el-checkbox label="B">{{multAnswer.optionb}}</el-checkbox></el-tag>
+                <el-tag>C：<el-checkbox label="C">{{multAnswer.optionc}}</el-checkbox></el-tag>
+                <el-tag>D：<el-checkbox label="D">{{multAnswer.optiond}}</el-checkbox></el-tag>
               </el-radio-group>
               <div class="analysis" v-if="isPractice">
                 <ul>
@@ -106,40 +107,39 @@
               </div>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{topic[2][index].answer}}</span></li>
+                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{fillAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{topic[2][index].analysis == null ? '暂无解析': topic[2][index].analysis}}</li>
+                  <li>{{fillAnswer.analysis == null ? '暂无解析': fillAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>
             <div class="judge" v-if="currentType == 4">
-              <el-radio-group v-model="judgeAnswer[index]" @change="getJudgeLabel" v-if="currentType == 3">
+              <el-radio-group v-model="judgeAnswer.quesid" @change="getJudgeLabel" v-if="currentType == 4">
                 <el-radio :label="1">正确</el-radio>
                 <el-radio :label="2">错误</el-radio>
               </el-radio-group>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{topic[3][index].answer}}</span></li>
+                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{judgeAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{topic[3][index].analysis == null ? '暂无解析': topic[3][index].analysis}}</li>
+                  <li>{{judgeAnswer.analysis == null ? '暂无解析': judgeAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="fill" v-if="currentType != 1&&currentType != 2&&currentType != 3&&currentType != 4">
-            <div v-for="(item,currentIndex) in part" :key="currentIndex">
+            <div v-if="currentType != 1&&currentType != 2&&currentType != 3&&currentType != 4">
               <el-input placeholder="请填在此处"
-                        v-model="fillAnswer[index][currentIndex]"
-                        clearable
-                        @blur="fillBG">
+                        type="textarea"
+                        class="input"
+                        v-model="shortAnswer.quesid"
+                        @blur="shortBG">
               </el-input>
-            </div>
-            <div class="analysis" v-if="isPractice">
-              <ul>
-                <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{topic[2][index].answer}}</span></li>
-                <li><el-tag>题目解析：</el-tag></li>
-                <li>{{topic[2][index].analysis == null ? '暂无解析': topic[2][index].analysis}}</li>
-              </ul>
+              <div class="analysis" v-if="isPractice">
+                <ul>
+                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{shortAnswer.answer}}</span></li>
+                  <li><el-tag>题目解析：</el-tag></li>
+                  <li>{{shortAnswer.analysis == null ? '暂无解析': shortAnswer.analysis}}</li>
+                </ul>
+              </div>
             </div>
           </div>
           <div class="operation">
@@ -162,6 +162,8 @@ export default {
   store,
   data() {
     return {
+      order:0,//题的序号
+
       startTime: null, //考试开始时间
       endTime: null, //考试结束时间
       time: null, //考试持续时间
@@ -175,7 +177,7 @@ export default {
       radio: [], //保存考生所有单项选择题的选项
       checkbox:[],//保存考生所有多项选择题的选项
       title: "请选择正确的选项",
-      index: 0, //全局index
+      Index: 0, //全局Index
       userInfo: { //用户信息
         name: null,
         id: null
@@ -193,14 +195,18 @@ export default {
       paperQuesType:{},//试卷各题型信息
       paperQuesNum:0,//试卷试题总数量
       paperScores:[],//试卷各试题题型大概内容
+      QuesAnswer:[],//各种题目
 
-      showQuestion: [], //当前显示题目信息
+      showQuestion: '', //当前显示题目信息
+      showScore:'',//当前显示题目分数
+
       showAnswer: {}, //当前题目对应的答案选项
       number: 1, //题号
       part: null, //填空题的空格数量
       multAnswer:[],//多选题
       fillAnswer: [[]], //二维数组保存所有填空题答案
       judgeAnswer: [], //保存所有判断题答案
+      shortAnswer:[],//简答等其他题型
       topic1Answer: [],  //学生选择题作答编号,
       rightAnswer: ''
     }
@@ -249,149 +255,136 @@ export default {
         this.$axios(`/api/paper_content/${paperid}`).then(res => {  //通过paperId获取试题题目信息
           this.topic = {...res.data}
           console.log(this.topic)
-          /*let reduceAnswer = this.topic[2][this.index]
-          this.reduceAnswer = reduceAnswer*/
-          let keys = Object.keys(this.topic) //对象转数组
-          /*keys.forEach(e => {
-            let data = this.topic[e]
-            this.topicCount.push(data.length)
-            console.log(this.topicCount);
-          })*/
-          for(var i=0;i<this.paperScores.length;i++){
-            if(this.paperScores[i].questype==2){
-                let len = this.paperScores[i].quesnum
-                let father = []
-                for(let i = 0; i < len; i++) { //根据填空题数量创建二维空数组存放每道题答案
-                  let children = [null,null,null,null]
-                  father.push(children)
-                }
-                this.fillAnswer = father
-                let dataInit = this.topic[2]
-                this.number = 1
-                this.showQuestion = dataInit[0].question
-                this.showAnswer = dataInit[0]
-            }
+          for(var j=0;j<this.topic.length;j++){
+
           }
+          for(var i=0;i<this.paperScores.length;i++) {
+            if (this.paperScores[i].questype == 2) {
+              let len = this.paperScores[i].quesnum
+              let father = []
+              for (let i = 0; i < len; i++) { //根据填空题数量创建二维空数组存放每道题答案
+                let children = [null, null, null, null]
+                father.push(children)
+                  }
+                this.fillAnswer = father
+                }
+              }
+              let dataInit = this.topic[this.paperScores[0].questype]
+              console.log(dataInit)
+              this.number = 1
+              this.showQuestion = dataInit[0].question
+              this.showScore=dataInit[0].score
+              if(this.topic[this.paperScores[0].questype][0].questype==1){
+                this.singAnswer = dataInit[0]
+              }else if(this.topic[this.paperScores[0].questype][0].questype==2){
+                this.multAnswer = dataInit[0]
+              }
+          console.log(this.singAnswer)
         })
       })
     },
-    sing(index) { //单项选择题
-      this.index = index
-      let singAnswer = this.topic[1][this.index]
-      this.singAnswer = singAnswer
-      this.isFillClick = true
-      this.currentType = 1
-      if(this.topic[1]!=undefined){
-        let len = this.topic[1].length
-        if(this.index < len) {
-          if(this.index <= 0){
-            this.index = 0
-          }
-          console.log(`总长度${len}`)
+    change(questype,index) { //单项选择题
+      if(questype==1) {
+        this.Index = index
+        let quesAnswer = this.topic[questype][this.Index]
+        this.singAnswer = quesAnswer
+        /*this.radio[this.singAnswer.quesid]=''*/
+        this.isFillClick = true
+        this.currentType = questype
+        console.log(`当前index:${index}`)
+        this.title = "请选择正确的选项"
+        /*let Data = this.topic[questype]
+        console.log(Data)*/
+        this.showQuestion = this.singAnswer.question //获取题目信息
+        this.showScore=this.singAnswer.score//获取题目分数信息
+        /*this.showAnswer = this.singAnswer*/
+        this.number =index+1
+        } else if (questype == 2) {
+          this.Index = index
+          let quesAnswer = this.topic[questype][this.Index]
+          this.multAnswer = quesAnswer
+          this.isFillClick = true
+          /*this.checkbox[this.multAnswer.quesid]=''*/
+          this.currentType = questype
           console.log(`当前index:${index}`)
           this.title = "请选择正确的选项"
-          let Data = this.topic[1]
-          // console.log(Data)
-          this.showQuestion = Data[this.index].question //获取题目信息
-          this.showAnswer = Data[this.index]
-          this.number = this.index + 1
-        }else if(this.index >= len) {
-          this.index = 0
-          this.fill(this.index)
-        }
-      }
-    },
-    mult(index) { //多项选择题
-      this.index = index
-      let multAnswer = this.topic[2][this.index]
-      this.multAnswer = multAnswer
-      this.isFillClick = true
-      this.currentType = 2
-      if(this.topic[2]!=undefined){
-        let len = this.topic[2].length
-        if(this.index < len) {
-          if(this.index <= 0){
-            index = this.topic[1].length -1
-            this.sing(index)
-          }
-          console.log(`总长度${len}`)
+          // let Data = this.topic[questype]
+          // // console.log(Data)
+          this.showQuestion = this.multAnswer.question //获取题目信息
+          this.showScore=this.multAnswer.score//获取题目分数信息
+          // this.showAnswer = Data[this.Index]
+          this.number =index+ 1
+        } else if (questype == 3) {
+          this.Index = index
+          /*let len = this.topic[questype].length*/
+          this.currentType = questype
+          this.Index = index
           console.log(`当前index:${index}`)
-          this.title = "请选择正确的选项"
-          let Data = this.topic[2]
-          // console.log(Data)
-          this.showQuestion = Data[this.index].question //获取题目信息
-          this.showAnswer = Data[this.index]
-          this.number = this.paperScores[0].quesnum + 1
-        }else if(this.index >= len) {
-          this.index = 0
-          this.fill(this.index)
+          this.title = "请在横线处填写答案"
+          let Data = this.topic[questype]
+          console.log(Data)
+          this.showQuestion = Data[index].question //获取题目信息
+          this.showScore=Data[index].score//获取题目分数信息
+          let part = this.showQuestion.split("()").length - 1 //根据题目中括号的数量确定填空横线数量
+          this.part = part
+          this.number =index+ 1
+        }else if (questype == 4) {
+     /*     let len = this.topic[questype].length*/
+          this.currentType = questype
+          this.Index = index
+          let quesAnswer = this.topic[questype][this.Index]
+          this.judgeAnswer = quesAnswer
+          console.log(`当前index:${index}`)
+          this.title = "请作出正确判断"
+          let Data = this.topic[questype]
+          console.log(Data)
+          this.showQuestion = this.judgeAnswer.question //获取题目信息
+          this.showScore=this.judgeAnswer.score//获取题目分数信息
+          this.number =index+ 1
+        }else {
+          let len = this.topic[questype].length
+          this.currentType = questype
+          this.Index = index
+          let quesAnswer = this.topic[questype][this.Index]
+          this.shortAnswer = quesAnswer
+          console.log(`当前index:${index}`)
+          this.title = "请在输入框处填写答案"
+          let Data = this.topic[questype]
+          console.log(Data)
+          this.showQuestion = this.shortAnswer.question //获取题目信息
+          this.showScore=this.shortAnswer.score//获取题目分数信息
+          this.number =index+ 1
         }
-      }
     },
     fillBG() { //填空题已答题目 如果已答该题目,设置第四个元素为true为标识符
       if(this.fillAnswer[this.index][0] != null) {
         this.fillAnswer[this.index][3] = true
       }
     },
-    fill(index) { //填空题
-      if(this.topic[3]!=undefined){
-        let len = this.topic[3].length
-        this.currentType = 3
-        this.index = index
-        if(index < len) {
-          if(index < 0) {
-            index = this.topic[2].length -1
-            this.mult(index)
-          }else {
-            console.log(`总长度${len}`)
-            console.log(`当前index:${index}`)
-            this.title = "请在横线处填写答案"
-            let Data = this.topic[3]
-            console.log(Data)
-            this.showQuestion = Data[index].question //获取题目信息
-            let part= this.showQuestion.split("()").length -1 //根据题目中括号的数量确定填空横线数量
-            this.part = part
-            this.number = this.paperScores[0].quesnum+this.paperScores[1].quesnum + index + 1
-          }
-        }else if(index >= len) {
-          this.index = 0
-          this.judge(this.index)
-        }
+    shortBG() { //填空题已答题目 如果已答该题目,设置第四个元素为true为标识符
+      if(this.fillAnswer[this.index][0] != null) {
+        this.fillAnswer[this.index][3] = true
       }
     },
-    judge(index) { //判断题
-      if(this.topic[4]!=undefined){
-        let len = this.topic[4].length
-        this.currentType =4
-        this.index = index
-        if(this.index < len) {
-          if(this.index < 0){
-            this.index = this.topic[3].length - 1
-            this.fill(this.index)
-          }else {
-            console.log(`总长度${len}`)
-            console.log(`当前index:${this.index}`)
-            this.title = "请作出正确判断"
-            let Data = this.topic[4]
-            console.log(Data)
-            this.showQuestion = Data[index].question //获取题目信息
-            this.number = this.paperScores[0].quesnum+this.paperScores[1].quesnum + this.paperScores[2].quesnum + index + 1
-          }
-        }else if (this.index >= len) {
-          this.index = 0
-          this.change(this.index)
-        }
-      }
-    },
-    getChangeLabel(val) { //获取选择题作答选项
+    getChangeLabel(val) { //获取单项选择题作答选项
       this.radio[this.index] = val //当前选择的序号
       if(val) {
-        let data = this.topic[1]
+        let data = this.topic[this.currentType]
         this.bg_flag = true
         data[this.index]["isClick"] = true
       }
       /* 保存学生答题选项 */
       this.topic1Answer[this.index] = val 
+    },
+    getChangeLabe2(val) { //获取多项选择题作答选项
+      this.checkbox[this.index] = val //当前选择的序号
+      if(val) {
+        let data = this.topic[this.currentType]
+        this.bg_flag = true
+        data[this.index]["isClick"] = true
+      }
+      /* 保存学生答题选项 */
+      this.topic2Answer[this.index] = val
     },
     getJudgeLabel(val) {  //获取判断题作答选项
       this.judgeAnswer[this.index] = val
@@ -657,6 +650,7 @@ export default {
 .content {
   padding: 0px 20px;
 }
+.input { width:99%;height:99%;border-top:0px;border-left:0px;border-right:0px;border-bottom:0px;}
 .content .topic {
   padding: 20px 0px;
   padding-top: 30px; 
@@ -808,7 +802,7 @@ export default {
   border: 1px solid #FF90AA;
 }
 #answer .top {
-  background-color: rgb(39, 118, 223);
+  background-color: rgb(42, 42, 42);
 }
 #answer .item {
   color: #fff;

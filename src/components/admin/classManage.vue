@@ -270,7 +270,7 @@
                                 this.Majors.push({label: element.major, value: element.majorid});
                             })
                             this.loading = false;
-                            this.form.majorid=this.Majors[0].label
+                            this.form.majorid=this.Majors[0].majorid
                            /* this.form.majorid = ''*/
                         } else {
                             this.form.majorid = ''

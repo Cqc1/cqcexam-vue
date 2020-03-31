@@ -377,7 +377,8 @@
                         /*this.form.exdate = examDate.substr(0, 10)*/
                         this.form.majors=this.arrToStr(this.form.majorsId);
                         this.$axios(`/api/exam/OnlyExamId`).then(res => {
-                            this.form.examId = res.data.data.examId + 1 //实现examId自增1
+                          /*  this.form.examId = res.data.data.examId + 1 //实现examId自增1*/
+                            this.form.isexam=0
                             this.$axios({
                                 url: '/api/exam/add',
                                 method: 'post',
