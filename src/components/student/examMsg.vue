@@ -21,7 +21,8 @@
         <li>考试时间：{{examData.exdate}}</li>
         <li>来自 {{examData.institution.instituname}}</li>
         <li class="btn">{{examData.course.couname}}</li>
-        <li class="right"><el-button @click="toAnswer(examData.examid)">开始答题</el-button></li>
+        <li v-if="!this.$route.query.isPractice" class="right"><el-button  @click="toAnswer(examData.examid)">开始答题</el-button></li>
+        <li v-if="this.$route.query.isPractice" class="right"><el-button  @click="toAnswer(examData.examid)">开始练习</el-button></li>
       </ul>
       <ul class="info">
         <li @click="dialogVisible = true"><a href="javascript:;"><i class="iconfont icon-info"></i>考生须知</a></li>
@@ -119,15 +120,17 @@ export default {
       let date = new Date(this.examData.exdate);
       this.examData.exdate=this.format(date, "yyyy-MM-dd HH:mm:ss");
       console.log(this.currentTime+"====="+this.examData.exdate);
-      if(this.currentTime>this.examData.exdate){
+      if(this.currentTime>this.examData.exdate&&!this.$route.query.isPractice){
         if(this.examData.isexam==0){
-          this.$router.push({path:"/answer",query:{examid: id}})
+          this.$router.push({path:"/answer",query:{examid: id, path:this.$route.params.path}})
         }else{
           this.$message({
             message: '该考试已经考过，不许重复考试！',
             type: 'warning'
           })
         }
+      }else if(this.$route.query.isPractice) {
+        this.$router.push({path:"/answer",query:{examid: id,isPractice:true}})
       }else{
         this.$message({
           message: '还未到考试开始时间！',

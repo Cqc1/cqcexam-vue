@@ -54,7 +54,7 @@ const mutations = {
   },
   changeUserInfo(state,info) {
     state.userInfo = info
-  }
+  },
 }
 const getters = {
  

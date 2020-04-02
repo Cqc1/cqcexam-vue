@@ -72,7 +72,7 @@ export default {
     },*/
     //获取当前所有考试信息
     getExamInfo() {
-      this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
+      this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}/${0}`).then(res => {
         this.pagination = res.data.data
         this.loading = false
         console.log(this.pagination)
@@ -114,7 +114,7 @@ export default {
           this.$axios(`/api/exam/selectById/${examid}`).then(res => {
             var majors=res.data.data.majors;
             if(majors.includes('['+institutionid+','+majorid+']')){
-              this.$router.push({path: '/examMsg', query: {examid: examid}})
+              this.$router.push({path: '/examMsg', query: {examid: examid,isPractice:false}})
               console.log(examid)
             }else{
               this.$message({

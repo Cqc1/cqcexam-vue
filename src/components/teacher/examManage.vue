@@ -66,6 +66,7 @@
                         <span>{{ props.row.description}}</span>
                     </el-form-item>
                     <el-form-item label="是否已考：">
+                        <span v-if="props.row.isexam==2">练习</span>
                         <span v-if="props.row.isexam==1">已考</span>
                         <span v-if="props.row.isexam==0">未考</span>
                     </el-form-item>
@@ -190,6 +191,10 @@
                     </el-form-item>
                     <el-form-item label="考试介绍：">
                         <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否已考：">
+                        <span v-if="props.row.isexam==1">已考</span>
+                        <span v-if="props.row.isexam==0">未考</span>
                     </el-form-item>
                 </el-form>
             </section>

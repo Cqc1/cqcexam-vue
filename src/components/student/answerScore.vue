@@ -1,26 +1,18 @@
 <template>
   <div class="score">
     <div class="title">
-      <p class="name">计算机网络</p>
-      <p class="description">(总分：100分,限时：100分钟)</p>
-      <p class="description">学生：大咸鱼</p>
+      <p class="name">{{exdata.exname}}</p>
+      <p class="description">(总分：{{exdata.paper.totalscore}}分,限时：{{exdata.extime}}分钟)</p>
+      <p class="description">学生：{{this.$cookies.get("cname")}}</p>
     </div>
     <div class="total">
       <div class="look">
-        本次考试成绩
+        本次考试客观题成绩
       </div>
       <div class="show">
-        <div class="img1" :class="{'img1Transform': imgShow}">
-          <img :src="imgSrc.fail1" alt="哭了" v-if="score < 60">
-          <img :src="imgSrc.pass1" alt="过了" v-if="score >= 60">
-        </div>
         <div class="number" :class="{'border': isTransition}">
           <span>{{score}}</span>
           <span>分数</span>
-        </div>
-        <div class="img2" :class="{'img2Transform': imgShow}">
-          <img :src="imgSrc.fail2" alt="哭了" v-if="score < 60">
-          <img :src="imgSrc.pass2" alt="过了" v-if="score >= 60">
         </div>
       </div>
       <ul class="time">
@@ -44,6 +36,7 @@ export default {
         pass1: require('@/assets/img/good1.jpg'),
         pass2: require('@/assets/img/good2.gif')
       },
+      exdata:{},
       startTime: null, //考试开始时间
       endTime: null, //考试结束时间
     }
@@ -63,9 +56,11 @@ export default {
       let score = this.$route.query.score
       let startTime = this.$route.query.startTime
       let endTime = this.$route.query.endTime
+      let exdata=this.$route.query.exdata
       this.score = score
       this.startTime = startTime
       this.endTime = endTime
+      this.exdata=exdata
     }
   }
 }

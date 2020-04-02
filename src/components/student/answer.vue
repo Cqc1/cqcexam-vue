@@ -123,7 +123,7 @@
               </el-radio-group>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{judgeAnswer.answer}}</span></li>
+                  <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{judgeAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
                   <li>{{judgeAnswer.analysis == null ? '暂无解析': judgeAnswer.analysis}}</li>
                 </ul>
@@ -139,7 +139,7 @@
               </el-input>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{shortAnswer.answer}}</span></li>
+                  <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{shortAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
                   <li>{{shortAnswer.analysis == null ? '暂无解析': shortAnswer.analysis}}</li>
                 </ul>
@@ -161,7 +161,10 @@
 
 <script>
 import store from '@/store/store'
+import Vue from 'vue'
 import {mapState} from 'vuex'
+import VueCountdown from '@chenfengyuan/vue-countdown'
+Vue.component(VueCountdown.name,VueCountdown)
 export default {
   store,
   data() {
@@ -235,7 +238,8 @@ export default {
       judgeAnswer: [], //保存所有判断题答案
       shortAnswer:[],//简答等其他题型
       topic1Answer: [],  //学生选择题作答编号,
-      rightAnswer: ''
+      rightAnswer: '',
+      key:'',
     }
   },
   created() {
@@ -243,8 +247,126 @@ export default {
     this.getExamData()
     this.showTime()
   },
+  mounted : function() {
+    const that = this
+    that.Listen()
+    var allowNum = 3; // 允许三次切屏，超过则提交
+    window.onblur = function () {
+      if (allowNum < 1) {
+        that.Autcommit()
+      }
+      allowNum--;
+      that.Message(allowNum);
+     /* alert("您已切" + `${3 - allowNum}` + "屏" + ",超过三次自动提交试卷")*/
+    }
+  },
   methods: {
-    getTime(date) { //日期格式化
+    Listen(){//监听事件
+      //  vuex中的数据发生改变时触发localStorage的存储操作
+      localStorage.setItem('state', JSON.stringify(this.$store.state))
+      //  页面加载的时候在created中获取本地存储中的数据
+      localStorage.getItem('state') && this.$store.replaceState(JSON.parse(localStorage.getItem('state')));
+      //在页面加载时读取sessionStorage里的状态信息
+      if (sessionStorage.getItem("store")) {
+        this.$store.replaceState(Object.assign({},this.$store.state, JSON.parse(sessionStorage.getItem("store"))))
+      }
+      //在页面刷新时将vuex里的信息保存到sessionStorage里
+      window.addEventListener("beforeunload", () => {
+        this.$cookies.set("Endtime", this.time)
+        alert(this.$cookies.get("Endtime"));
+        console.log("this.paperScores")
+        sessionStorage.setItem("store", JSON.stringify(this.$store.state))
+      })
+      /*
+   * @param url 考试界面的链接
+   * @param name 新窗口的名称，没有可填空
+   * 属性menubar=no 新窗口隐藏菜单栏，防刷新即基本实现
+   */
+     /* window.open(this.$route.path, name, "menubar=no" )*/
+      document.onkeydown = function stopShortCutKey() {               //屏蔽鼠标右键、Ctrl+n、shift+F10、F5刷新、退格键
+        if ((window.event.altKey) && ((window.event.keyCode == 37) || (window.event.keyCode == 39))) {
+          alert("不准你使用ALT+方向键前进或后退网页！");
+          return false;
+        }
+        if ((event.keyCode == 116) ||                                   //屏蔽   F5   刷新键
+                (event.keyCode == 112) ||                                   //屏蔽   F1   刷新键
+                (event.ctrlKey && event.keyCode == 82)) {                   //Ctrl   +   R
+          return false;
+        }
+        if ((event.ctrlKey) && (event.keyCode == 78)) {
+          return false;      //屏蔽   Ctrl+n
+        }
+
+        if ((event.shiftKey) && (event.keyCode == 121)) {  //屏蔽   shift+F10
+          return false;
+        }
+        if (window.event.srcElement.tagName == "A" && window.event.shiftKey) {
+          return false;        //屏蔽   shift 加鼠标左键新开一网页
+        }
+        if ((window.event.altKey) && (window.event.keyCode == 115)) {   //屏蔽Alt+F4
+          window.showModelessDialog("about:blank", "", "dialogWidth:1px;dialogheight:1px");
+          return false;
+        }
+        if ((window.event.altkey) && (window.event.keyCode == 27)) {
+          alert("认真答题！");
+        }
+        if (event.keyCode == 8)//屏蔽退格键
+        {
+          event.keyCode = 0;
+          return false;
+        }
+        if (event.keyCode == 13)//屏蔽回车键
+        {
+          event.keyCode = 0;
+          return false;
+        }
+        if (event.keyCode == 116)//屏蔽F5刷新键
+        {
+          event.keyCode = 0;
+          return false;
+        }
+      }
+      //window中  vue写在mounted中
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        // 兼容IE8和Firefox 4之前的版本
+        if (e) {
+          e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
+        }
+        // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+        return "您是否确认离开此页面-您输入的数据可能不会被保存";
+      };
+
+      /*//使用addEventListener
+         window.addEventListener("beforeunload", e => {
+           this.beforeunloadHandler(e);
+         });*/
+      //window中  vue写在mounted中
+      window.onunload = function (e) {
+        e = e || window.event;
+        // 兼容IE8和Firefox 4之前的版本
+        if (e) {
+          e.returnValue = "您是否确认离开此页面-您输入的数据可能不会被保存";
+        }
+        // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+        return "您是否确认离开此页面-您输入的数据可能不会被保存";
+      };
+    },
+    Message(allowNum){
+      this.$message({
+        message: '您已切' +` ${3- allowNum}  `+"屏" + ',超过三次自动提交试卷',
+        type: 'warning'
+      })
+    },
+    shuffle(arr) {   //数组随机打乱
+      let i = arr.length;
+      while (i) {
+        let j = Math.floor(Math.random() * i--);
+        [arr[j], arr[i]] = [arr[i], arr[j]];
+      }
+      return arr;
+     },
+     getTime(date) { //日期格式化
       let year = date.getFullYear()
       let month= date.getMonth()+ 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
       let day=date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
@@ -257,9 +379,6 @@ export default {
     getCookies() {  //获取cookie
       this.userInfo.name = this.$cookies.get("cname")
       this.userInfo.id = this.$cookies.get("cid")
-    },
-    calcuScore() { //计算答题分数
-      
     },
     getExamData() { //获取当前试卷所有信息
       this.myAnswer=[]
@@ -275,9 +394,8 @@ export default {
           this.paperScores=this.paperQuesType.paperScores
           console.log(this.paperScores)
           for(var i=0;i<this.paperScores.length;i++){
-            this.paperQuesNum+=this.paperQuesType.paperScores[i].quesnum;
+            this.paperQuesNum+=this.paperScores[i].quesnum;
           }
-          /*console.log(this.topic);*/
         })
         this.$axios(`/api/paper_content/${paperid}`).then(res => {  //通过paperId获取试题题目信息
           this.topic = {...res.data}
@@ -310,6 +428,11 @@ export default {
             }else{
               this.shortAnswer = dataInit[0]
             }
+          for(var i=0;i<this.paperScores.length;i++){
+              this.paperQuesNum+=this.paperScores[i].quesnum;
+              this.key=this.paperScores[i].questype
+              this.topic[this.paperScores[i].questype]=this.shuffle(this.topic[this.paperScores[i].questype])
+          }
         })
       })
     },
@@ -543,7 +666,70 @@ export default {
         if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
       return fmt;
     },
+    Autcommit(){//自动提交函数
+      /* 计算客观题总分 */
+      let finalScore = 0
+      this.myAnswer.forEach((element,index) => { //循环每道选择题根据选项计算分数
+        if(element != null&&(element.questype==1||element.questype==2||element.questype==3||element.questype==4)) {
+          if (element.answer.trim() == element.rightAnswer.trim()) {
+            console.log(element.answer.trim()== element.rightAnswer.trim())
+            finalScore += element.score
+          }
+        }
+        // console.log(topic1Answer)
+      })
+      console.log(`目前总分${finalScore}`)
+      if(!this.isPractice) {
+        console.log("交卷")
+        this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        //提交答题信息
+        this.$axios.post('/api/answer/commit', this.myAnswer)
+        .then(res => {
+          if (res.data.code == 200) {
+            this.$message({
+              message: '提交试卷成功！',
+              type: 'success'
+            })
+            this.score.examid = this.$route.query.examid;
+            this.score.stuid = this.$cookies.get("cid");
+            this.score.course = this.examData.course.couname;
+            this.score.objscore = finalScore;
+            this.score.answerdate = this.endTime;
+            //提交成绩信息
+            this.$axios.post('/api/score/add', this.score).then(res => {
+              if (res.data.code == 200) {
+                this.$router.push({
+                  path: '/studentScore', query: {
+                    score: finalScore,
+                    startTime: this.startTime,
+                    endTime: this.endTime
+                  }
+                })
+              }
+            }).catch(() => {
+            })
+          }
+        })
+      }
+    },
+    Autcommit2(){//自动提交函数
+      if(!this.isPractice) {
+        console.log("定时交卷")
+        this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        //提交答题信息
+        this.$axios.post('/api/answer/commit', this.myAnswer)
+        .then(res => {
+          if (res.data.code == 200) {
+            this.$message({
+              message: '试卷保存成功！',
+              type: 'success'
+            })
+          }
+        })
+      }
+    },
     commit() { //答案提交计算分数
+      this.$cookies.remove("Endtime")
       /* 计算客观题总分 */
       let finalScore = 0
       this.myAnswer.forEach((element,index) => { //循环每道选择题根据选项计算分数
@@ -562,43 +748,61 @@ export default {
           cancelButtonText: '再检查一下',
           type: 'warning'
         }).then(() => {
-          console.log("交卷")
-          this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-          //提交答题信息
-          this.$axios.post('/api/answer/commit',this.myAnswer)
-          .then(res => {
-            if (res.data.code == 200) {
-              this.$message({
-                message: '提交试卷成功！',
-                type: 'success'
-              })
-              this.score.examid = this.$route.query.examid;
-              this.score.stuid = this.$cookies.get("cid");
-              this.score.course = this.examData.course.couname;
-              this.score.objscore = finalScore;
-              this.score.answerdate = this.endTime;
-              //提交成绩信息
-              this.$axios.post('/api/score/add',this.score).then(res => {
-                if (res.data.code == 200) {
-                  this.$router.push({
-                    path: '/studentScore', query: {
-                      score: finalScore,
-                      startTime: this.startTime,
-                      endTime: this.endTime
-                    }
-                  })
-                }
-              }).catch(() => {
-              })
-            }
-          }).catch(() => {
-            console.log("继续答题")
-          })
+          if(!this.isPractice) {
+            console.log("交卷")
+            this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+            //提交答题信息
+            this.$axios.post('/api/answer/commit', this.myAnswer)
+                    .then(res => {
+                      if (res.data.code == 200) {
+                        this.$message({
+                          message: '提交试卷成功！',
+                          type: 'success'
+                        })
+                        this.score.examid = this.$route.query.examid;
+                        this.score.stuid = this.$cookies.get("cid");
+                        this.score.course = this.examData.course.couname;
+                        this.score.objscore = finalScore;
+                        this.score.answerdate = this.endTime;
+                        //提交成绩信息
+                        this.$axios.post('/api/score/add', this.score).then(res => {
+                          if (res.data.code == 200) {
+                            this.$router.push({
+                              path: '/studentScore', query: {
+                                exdata:this.examData,
+                                score: finalScore,
+                                startTime: this.startTime,
+                                endTime: this.endTime
+                              }
+                            })
+                          }
+                        }).catch(() => {
+                        })
+                      }
+                    }).catch(() => {
+              console.log("继续答题")
+            })
+          }else{
+            this.$alert(`${finalScore}`, '练习得分', {
+              confirmButtonText: '确定',
+              callback: action => {
+                this.$message({
+                  type: 'info',
+                  message: `action: ${this.$router.push({
+                              path: '/practice', query: {}})}`
+                });
+              }
+            });
+          }
         })
       }
     },
     showTime() { //倒计时
       setInterval(() => {
+        if(this.$cookies.get("Endtime")!=null||this.$cookies.get("Endtime")!=undefined){
+          this.time=this.$cookies.get("Endtime")
+          console.log(this.time)
+        }
         this.time -= 1
         if(this.time == 10) {
           this.$message({
@@ -608,9 +812,13 @@ export default {
           })
           if(this.time == 0) {
             console.log("考试时间已到,强制交卷。")
+            this.Autcommit();
           }
         }
       },1000 * 60)
+      setInterval(() => {
+        this.Autcommit2();//保存试卷的操作
+      },50000)
     }
   },
   computed:mapState(["isPractice"])

@@ -5,27 +5,28 @@
     <section class="content">
       <el-table ref="filterTable" :data="score" v-loading="loading">
         <el-table-column
-          prop="answerDate"
+          prop="answerdate"
           label="考试日期"
           sortable
           width="300"
-          column-key="answerDate"
+          column-key="answerdate"
           :filters="filter"
           :filter-method="filterHandler">
         </el-table-column>
         <el-table-column
-          prop="subject"
-          label="课程名称"
+          prop="exname"
+          label="考试名称"
           width="300"
           filter-placement="bottom-end">
           <template slot-scope="scope">
-            <el-tag>{{scope.row.subject}}</el-tag>
+            <el-tag>{{scope.row.exname}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="etScore" label="考试分数" width="200"></el-table-column>
+        <el-table-column prop="totalscore" label="考试分数" width="200"></el-table-column>
         <el-table-column label="是否及格" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.etScore>= 60 ? 'success' : 'danger'">{{scope.row.etScore >= 60 ? "及格" : "不及格"}}</el-tag>
+            <el-tag v-if="scope.row.totalscore==null">{{"暂未出成绩"}}</el-tag>
+            <el-tag v-if="scope.row.totalscore!=null" :type="scope.row.totalscore>= 60 ? 'success' : 'danger'">{{scope.row.totalscore >= 60 ? "及格" : "不及格"}}</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -49,14 +50,15 @@ export default {
   methods: {
     getScore() {
       let studentId = this.$cookies.get("cid")
-      this.$axios(`/api/score/${studentId}`).then(res => {
+      this.$axios(`/api/score/selectByStuId/${studentId}`).then(res => {
         if(res.data.code == 200) {
           this.loading = false //数据加载完成去掉遮罩
           this.score = res.data.data
           let mapVal = this.score.map((element,index) => { //通过map得到 filter:[{text,value}]形式的数组对象
+
             let newVal = {}
-            newVal.text = element.answerDate
-            newVal.value = element.answerDate
+            newVal.text = element.answerdate
+            newVal.value = element.answerdate
             return newVal
           })
           let hash = []

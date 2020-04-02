@@ -112,6 +112,7 @@ const routes = [
     component: () => import('@/components/student/index'),
     children: [
       {path:"/",component: ()=> import('@/components/student/myExam')},
+      {path:"/practice",component: ()=> import('@/components/student/practiceExam')},
       {path:'/startExam', component: () => import('@/components/student/startExam')},
       {path: '/manager', component: () => import('@/components/student/manager')},
       {path: '/examMsg', component: () => import('@/components/student/examMsg')},

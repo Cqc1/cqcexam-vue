@@ -79,6 +79,16 @@
             <el-form-item prop="description" label="考试介绍：">
                 <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
             </el-form-item>
+            <el-form-item  prop="isexam" label="考试类型：">
+                <el-select v-model="form.isexam"  placeholder="请选择类型">
+                    <el-option
+                            v-for="item in types"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
                 <el-button type="text" @click="cancel()">取消</el-button>
@@ -155,13 +165,16 @@
                     ],
                     extime: [
                         { required: true, message: '请输入考试时长,单位为分钟', trigger: 'blur' },
-                        { min: 3,type: 'number', message: '请输入大于0数字', trigger: 'blur' },
+                        { min: 1,type: 'number', message: '请输入大于0数字', trigger: 'blur' },
                     ],
                     exdate: [
                         { required: true, message: '请选择考试日期', trigger: 'blur' },
                     ],
                     description: [
                         { required: true, message: '请选择考试介绍', trigger: 'blur' },
+                    ],
+                    isexam: [
+                        { required: true, message: '请选择类型', trigger: 'blur' },
                     ],
                 },
                 majorrop: {
@@ -176,6 +189,16 @@
                 placeholder2:'',
                 Courses: [],
                 Papers: [],
+                types: [ //考试类型
+                    {
+                        value: '0',
+                        label: '考试'
+                    },
+                    {
+                        value: '2',
+                        label: '练习'
+                    },
+                ],
             };
         },
         created() {
@@ -378,7 +401,6 @@
                         this.form.majors=this.arrToStr(this.form.majorsId);
                         this.$axios(`/api/exam/OnlyExamId`).then(res => {
                           /*  this.form.examId = res.data.data.examId + 1 //实现examId自增1*/
-                            this.form.isexam=0
                             this.$axios({
                                 url: '/api/exam/add',
                                 method: 'post',
