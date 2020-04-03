@@ -23,6 +23,14 @@ const routes = [
         component: () => import('@/components/teacher/paperReview')
       },
       {
+        path:'/teaPreview', //学生成绩批阅
+        component: () => import('@/components/teacher/teaPreview')
+      },
+      {
+        path:'/Preview', //学生成绩批阅
+        component: () => import('@/components/teacher/Preview')
+      },
+      {
         path: '/selectExamToPart', //学生分数段
         component: () => import('@/components/teacher/selectExamToPart')
       },

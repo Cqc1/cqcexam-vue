@@ -47,7 +47,7 @@ export default {
   },
   methods: {
     getExamInfo() { //分页查询所有考试信息
-      this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
+      this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}/${1}`).then(res => {
         this.pagination = res.data.data
       }).catch(error => {
       })

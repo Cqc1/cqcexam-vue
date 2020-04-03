@@ -249,40 +249,60 @@ export default {
   },
   mounted : function() {
     const that = this
-    that.Listen()
-    var allowNum = 3; // 允许三次切屏，超过则提交
-    window.onblur = function () {
-      if (allowNum < 1) {
-        that.Autcommit()
+    const allows=that.listenResize();
+    window.addEventListener('resize', that.listenResize,false)
+    const time1=setInterval(() => {
+      if(this.$cookies.get("Endtime")!=null||this.$cookies.get("Endtime")!=undefined){
+        this.time=this.$cookies.get("Endtime")
+        console.log(this.time)
       }
-      allowNum--;
-      that.Message(allowNum);
-     /* alert("您已切" + `${3 - allowNum}` + "屏" + ",超过三次自动提交试卷")*/
-    }
+      this.time -= 1
+      if(this.time == 10) {
+        this.$message({
+          showClose: true,
+          type: 'error',
+          message: '考生注意,考试时间还剩10分钟！！！'
+        })
+        if(this.time == 0) {
+          console.log("考试时间已到,强制交卷。")
+          this.Autcommit();
+        }
+      }
+    },1000 * 60)
+      const time2 = setInterval(() => {
+        this.Autcommit2();//保存试卷的操作
+      }, 5000)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(time1);
+      clearInterval(time2);
+      clearInterval(allows);
+    })
+  },
+  beforeDestroy: function () {
+    console.log("我已经离开了！");
+    window.removeEventListener('resize', this.listenResize,false)
+    document.onkeydown=null;
+    window.onbeforeunload =null;
+    window.onunload =null;
+    /*// 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(time1);
+      clearInterval(time2);
+    })*/
   },
   methods: {
-    Listen(){//监听事件
-      //  vuex中的数据发生改变时触发localStorage的存储操作
-      localStorage.setItem('state', JSON.stringify(this.$store.state))
-      //  页面加载的时候在created中获取本地存储中的数据
-      localStorage.getItem('state') && this.$store.replaceState(JSON.parse(localStorage.getItem('state')));
-      //在页面加载时读取sessionStorage里的状态信息
-      if (sessionStorage.getItem("store")) {
-        this.$store.replaceState(Object.assign({},this.$store.state, JSON.parse(sessionStorage.getItem("store"))))
-      }
-      //在页面刷新时将vuex里的信息保存到sessionStorage里
-      window.addEventListener("beforeunload", () => {
-        this.$cookies.set("Endtime", this.time)
-        alert(this.$cookies.get("Endtime"));
-        console.log("this.paperScores")
-        sessionStorage.setItem("store", JSON.stringify(this.$store.state))
-      })
-      /*
-   * @param url 考试界面的链接
-   * @param name 新窗口的名称，没有可填空
-   * 属性menubar=no 新窗口隐藏菜单栏，防刷新即基本实现
-   */
-     /* window.open(this.$route.path, name, "menubar=no" )*/
+    listenResize(){//监听事件
+      const that = this
+      var allowNum = 3; // 允许三次切屏，超过则提交
+        window.onblur = function () {
+          if (allowNum < 1) {
+            that.Autcommit()
+            window.onblur =null
+          }
+          allowNum--;
+          that.Message(allowNum);
+          /* alert("您已切" + `${3 - allowNum}` + "屏" + ",超过三次自动提交试卷")*/
+        }
       document.onkeydown = function stopShortCutKey() {               //屏蔽鼠标右键、Ctrl+n、shift+F10、F5刷新、退格键
         if ((window.event.altKey) && ((window.event.keyCode == 37) || (window.event.keyCode == 39))) {
           alert("不准你使用ALT+方向键前进或后退网页！");
@@ -336,11 +356,6 @@ export default {
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
         return "您是否确认离开此页面-您输入的数据可能不会被保存";
       };
-
-      /*//使用addEventListener
-         window.addEventListener("beforeunload", e => {
-           this.beforeunloadHandler(e);
-         });*/
       //window中  vue写在mounted中
       window.onunload = function (e) {
         e = e || window.event;
@@ -353,10 +368,14 @@ export default {
       };
     },
     Message(allowNum){
-      this.$message({
-        message: '您已切' +` ${3- allowNum}  `+"屏" + ',超过三次自动提交试卷',
-        type: 'warning'
-      })
+      if(allowNum<0){
+        allowNum=null;
+      } else {
+        this.$message({
+          message: '您已切' + ` ${3 - allowNum}  ` + "屏" + ',超过三次自动提交试卷',
+          type: 'warning'
+        })
+      }
     },
     shuffle(arr) {   //数组随机打乱
       let i = arr.length;
@@ -700,6 +719,7 @@ export default {
               if (res.data.code == 200) {
                 this.$router.push({
                   path: '/studentScore', query: {
+                    exdata:this.examData,
                     score: finalScore,
                     startTime: this.startTime,
                     endTime: this.endTime
@@ -798,7 +818,7 @@ export default {
       }
     },
     showTime() { //倒计时
-      setInterval(() => {
+     /* const time1=setInterval(() => {
         if(this.$cookies.get("Endtime")!=null||this.$cookies.get("Endtime")!=undefined){
           this.time=this.$cookies.get("Endtime")
           console.log(this.time)
@@ -816,10 +836,18 @@ export default {
           }
         }
       },1000 * 60)
-      setInterval(() => {
-        this.Autcommit2();//保存试卷的操作
-      },50000)
-    }
+      if(this.time>=0) {
+        const time2 = setInterval(() => {
+          this.Autcommit2();//保存试卷的操作
+        }, 50000)
+      }else{
+
+      }*/
+    },
+  /*  // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(time1);
+    })*/
   },
   computed:mapState(["isPractice"])
 }

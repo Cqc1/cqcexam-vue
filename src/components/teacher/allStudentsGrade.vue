@@ -14,6 +14,11 @@
       <el-table-column align='center' prop="totalscore" label="总分" width="80"></el-table-column>
       <el-table-column align='center' prop="student.sex" label="性别" width="50"></el-table-column>
       <el-table-column align='center' prop="student.tel" label="联系方式" width="120"></el-table-column>
+      <el-table-column align='center' label="是否批阅" width="120">
+        <template slot-scope="scope">
+          <el-tag>{{scope.row.ispreview== 1 ? "已批阅" : "未批阅"}}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column align='center' fixed="right" label="操作" width="150">
         <template slot-scope="scope">
           <el-button type="warning" icon='edit' size="mini" @click='onEditScore(scope.row.scoreid)'>编辑</el-button>

@@ -2,7 +2,7 @@
   <div class="part" >
     <div class="box" ref="box"></div>
     <div v-if="isNull">
-      <span>该门考试还没人参考哦,请提醒学生参加考试。</span>
+      <span>该门考试暂未出分数，请耐心等待。</span>
     </div>
   </div>
 </template>
@@ -31,8 +31,9 @@ export default {
     getScoreInfo() {
       let examid = this.$route.query.examid
       this.name = this.$route.query.exname
-      this.$axios(`/api/score/selectByExamId/${examid}`).then(res => {
-        if(res.data.data==null){
+      this.$axios(`/api/score/selectByExamId/${examid}/${1}`).then(res => {
+        if(res.data.code==404){
+          console.log(res.data.code)//value值
           this.isNull = true
         }else {
           let data = res.data.data

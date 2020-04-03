@@ -193,8 +193,8 @@
                         <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
                     </el-form-item>
                     <el-form-item label="是否已考：">
-                        <span v-if="props.row.isexam==1">已考</span>
-                        <span v-if="props.row.isexam==0">未考</span>
+                        <span v-if="form.isexam==1">已考</span>
+                        <span v-if="form.isexam==0">未考</span>
                     </el-form-item>
                 </el-form>
             </section>
@@ -298,7 +298,7 @@
         methods: {
             getExamInfo(){
                 //分页查询所有班级信息
-                this.$axios(`/api/exam/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
+                this.$axios(`/api/exam/findPage/${this.pagination.current}/${this.pagination.size}`).then(res => {
                     this.pagination = res.data.data;
                     this.loading = false;
                     this.tableData=[];
