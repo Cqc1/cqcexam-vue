@@ -9,6 +9,11 @@
                 <li><el-button type="primary" @click="search()">搜索考试</el-button></li>
             </ul>
             <ul class="paper" v-loading="loading">
+                <li class="item" v-if="pagination.records.length==0">
+                    <div class="info" v-if="pagination.records.length==0">
+                        <span>暂无练习安排</span>
+                    </div>
+                </li>
                 <li class="item" v-for="(item,index) in pagination.records" :key="index">
                     <h4 @click="toExamMsg(item.examid)">{{item.exname}}</h4>
                     <p class="name">{{item.exname}}-{{item.description}}</p>
@@ -35,6 +40,8 @@
 </template>
 
 <script>
+    import store from '@/store/store'
+    import {mapState} from 'vuex'
     export default {
         // name: 'myExam'
         data() {
@@ -43,6 +50,7 @@
                 key: null, //搜索关键字
                 allExam: null, //所有考试信息
                 pagination: { //分页后的考试信息
+                    records:[],
                     current: 1, //当前页
                     total: null, //记录条数
                     size: 6 //每页条数
@@ -114,7 +122,7 @@
                         this.$axios(`/api/exam/selectById/${examid}`).then(res => {
                             var majors=res.data.data.majors;
                             if(majors.includes('['+institutionid+','+majorid+']')){
-                                this.$router.push({path: '/examMsg', query: {examid: examid,isPractice:true}})
+                                this.$router.push({path: '/examMsg', query: {examid: examid}})
                                 console.log(examid)
                             }else{
                                 this.$message({
@@ -131,7 +139,8 @@
                     }
                 })
             }
-        }
+        },
+        computed:mapState(["isPractice"])
     }
 </script>
 

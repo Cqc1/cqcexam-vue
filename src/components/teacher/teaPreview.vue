@@ -21,7 +21,7 @@
             </el-table-column>
             <el-table-column align='center' fixed="right" label="操作" width="120">
                 <template slot-scope="scope">
-                    <el-button @click="toPreview(scope.row.examid,scope.row.stuid)" type="warning" icon='edit' size="small">批阅</el-button>
+                    <el-button @click="toPreview(scope.row.examid,scope.row.stuid,scope.row.scoreid)" type="warning" icon='edit' size="small">批阅</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -48,8 +48,8 @@
                 });
             },
             // 批阅试卷
-            toPreview(examid,stuid) {
-                this.$router.push({path: '/Preview', query:{examid: examid, stuid: stuid}})
+            toPreview(examid,stuid,scoreid) {
+                this.$router.push({path: '/Preview', query:{examid: examid, stuid: stuid,scoreid:scoreid}})
             },
         }
     };

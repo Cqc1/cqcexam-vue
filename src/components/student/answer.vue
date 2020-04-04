@@ -53,6 +53,9 @@
                   </li>
                 </ul>
               </div>
+              <video v-if="!isPractice" id="videoCamera" :width="videoWidth" :height="videoHeight" autoplay></video>
+              <canvas v-if="!isPractice" style="display:none;" id="canvasCamera" :width="videoWidth" :height="videoHeight" ></canvas>
+              <div v-if="!isPractice" class="final" @click="getCompetence()">打开摄像头</div>
               <div class="final" @click="commit()">结束考试</div>
             </div>
           </div>
@@ -109,7 +112,7 @@
               </div>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确姿势：</el-tag><span class="right">{{fillAnswer.answer}}</span></li>
+                  <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{fillAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
                   <li>{{fillAnswer.analysis == null ? '暂无解析': fillAnswer.analysis}}</li>
                 </ul>
@@ -161,15 +164,13 @@
 
 <script>
 import store from '@/store/store'
-import Vue from 'vue'
 import {mapState} from 'vuex'
-import VueCountdown from '@chenfengyuan/vue-countdown'
-Vue.component(VueCountdown.name,VueCountdown)
 export default {
   store,
   data() {
     return {
       order:0,//题的序号
+      pictureFile:[],//保存图片文件的文件数字
 
       startTime: null, //考试开始时间
       endTime: null, //考试结束时间
@@ -232,7 +233,6 @@ export default {
 
       showAnswer: {}, //当前题目对应的答案选项
       number: 1, //题号
-      part: null, //填空题的空格数量
       multAnswer:[],//多选题
       fillAnswer: [[]], //二维数组保存所有填空题答案
       judgeAnswer: [], //保存所有判断题答案
@@ -240,43 +240,59 @@ export default {
       topic1Answer: [],  //学生选择题作答编号,
       rightAnswer: '',
       key:'',
+
+      videoWidth: 280,
+      videoHeight: 280,
+      imgSrc: '',
+      thisCancas: null,
+      thisContext: null,
+      thisVideo: null,
+      captures: [],//用于捕获截图
+
     }
   },
   created() {
     this.getCookies()
     this.getExamData()
-    this.showTime()
   },
   mounted : function() {
     const that = this
-    const allows=that.listenResize();
-    window.addEventListener('resize', that.listenResize,false)
-    const time1=setInterval(() => {
-      if(this.$cookies.get("Endtime")!=null||this.$cookies.get("Endtime")!=undefined){
-        this.time=this.$cookies.get("Endtime")
-        console.log(this.time)
-      }
-      this.time -= 1
-      if(this.time == 10) {
-        this.$message({
-          showClose: true,
-          type: 'error',
-          message: '考生注意,考试时间还剩10分钟！！！'
-        })
-        if(this.time == 0) {
-          console.log("考试时间已到,强制交卷。")
-          this.Autcommit();
+    console.log(that.isPractice)
+    if(!that.isPractice) {
+      const allows=that.listenResize();
+      window.addEventListener('resize', that.listenResize,false)
+      const time1 = setInterval(() => {
+        that.time -= 1
+        if (that.time == 10) {
+          that.$message({
+            showClose: true,
+            type: 'warning',
+            message: '考生注意,考试时间还剩10分钟！！！'
+          })
+          if (that.time == 0) {
+            that.$message({
+              showClose: true,
+              type: 'warning',
+              message: '考试时间已到，强制交卷！！！'
+            })
+            that.Autcommit();
+          }
         }
-      }
-    },1000 * 60)
+      }, 1000 * 60)
       const time2 = setInterval(() => {
-        this.Autcommit2();//保存试卷的操作
-      }, 5000)
-    this.$once('hook:beforeDestroy', () => {
-      clearInterval(time1);
-      clearInterval(time2);
-      clearInterval(allows);
-    })
+        that.Autcommit2();//保存试卷的操作
+      }, 50000)
+      const picture = setInterval(() => {
+     that.setImage ();//拍照的操作
+       }, 5000)
+      that.$once('hook:beforeDestroy', () => {
+        console.log("我已经离开了！");
+        clearInterval(time1);
+        clearInterval(time2);
+        clearInterval(allows);
+        clearInterval(picture);
+      })
+    }
   },
   beforeDestroy: function () {
     console.log("我已经离开了！");
@@ -284,16 +300,96 @@ export default {
     document.onkeydown=null;
     window.onbeforeunload =null;
     window.onunload =null;
-    /*// 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-    this.$once('hook:beforeDestroy', () => {
-      clearInterval(time1);
-      clearInterval(time2);
-    })*/
+    window.onblur =null
+    this.stopNavigator();
   },
   methods: {
-    listenResize(){//监听事件
+    // 调用权限（打开摄像头功能）
+    getCompetence () {
+      var _this = this
+      this.thisCancas = document.getElementById('canvasCamera')
+      this.thisContext = this.thisCancas.getContext('2d')
+      this.thisVideo = document.getElementById('videoCamera')
+      // 旧版本浏览器可能根本不支持mediaDevices，我们首先设置一个空对象
+      if (navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {}
+      }
+      // 一些浏览器实现了部分mediaDevices，我们不能只分配一个对象
+      // 使用getUserMedia，因为它会覆盖现有的属性。
+      // 这里，如果缺少getUserMedia属性，就添加它。
+      if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function (constraints) {
+          // 首先获取现存的getUserMedia(如果存在)
+          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.getUserMedia
+          // 有些浏览器不支持，会返回错误信息
+          // 保持接口一致
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'))
+          }
+          // 否则，使用Promise将调用包装到旧的navigator.getUserMedia
+          return new Promise(function (resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject)
+          })
+        }
+      }
+      var constraints = { audio: false, video: { width: this.videoWidth, height: this.videoHeight, transform: 'scaleX(-1)' } }
+      navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+        // 旧的浏览器可能没有srcObject
+        if ('srcObject' in _this.thisVideo) {
+          _this.thisVideo.srcObject = stream
+        } else {
+          // 避免在新的浏览器中使用它，因为它正在被弃用。
+          _this.thisVideo.src = window.URL.createObjectURL(stream)
+        }
+        _this.thisVideo.onloadedmetadata = function (e) {
+          _this.thisVideo.play()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    //  绘制图片（拍照功能）
+    setImage () {
+      this.captures=[]
+      var _this = this
+      if(_this.thisContext==null) {
+        this.$message({
+          showClose: true,
+          type: 'warning',
+          message: '请打开摄像头权限！！！'
+        })
+      }
+      // 点击，canvas画图
+      _this.thisContext.drawImage(_this.thisVideo, 0, 0, _this.videoWidth, _this.videoHeight)
+      // 获取图片base64链接
+      var image = this.thisCancas.toDataURL('image/png')
+      _this.imgSrc = image
+      this.$emit('refreshDataList', this.imgSrc)
+      this.captures.push(image);
+     /* console.log(this.captures)*/
+    },
+// base64转文件
+    dataURLtoFile (dataurl, filename) {
+      var arr = dataurl.split(',')
+      var mime = arr[0].match(/:(.*?);/)[1]
+      var bstr = atob(arr[1])
+      var n = bstr.length
+      var u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new File([u8arr], filename, { type: mime })
+    },
+// 关闭摄像头
+    stopNavigator () {
+      if(this.thisVideo!=null){
+        this.thisVideo.srcObject.getTracks()[0].stop()
+      }
+    },
+
+  listenResize(){//监听事件
       const that = this
-      var allowNum = 3; // 允许三次切屏，超过则提交
+      var allowNum = 4; // 允许三次切屏，超过则提交,其中打开摄像头不算
         window.onblur = function () {
           if (allowNum < 1) {
             that.Autcommit()
@@ -372,7 +468,7 @@ export default {
         allowNum=null;
       } else {
         this.$message({
-          message: '您已切' + ` ${3 - allowNum}  ` + "屏" + ',超过三次自动提交试卷',
+          message: '您已切' + ` ${4 - allowNum}  ` + "屏" + ',超过三次自动提交试卷,（打开摄像头权限不算）',
           type: 'warning'
         })
       }
@@ -700,6 +796,10 @@ export default {
       console.log(`目前总分${finalScore}`)
       if(!this.isPractice) {
         console.log("交卷")
+        for(var i=0;i<this.captures.length;i++){
+          this.pictureFile.push(this.dataURLtoFile (this.captures[i], "picture"+i))
+        }
+        /*console.log(this.pictureFile)*/
         this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
         //提交答题信息
         this.$axios.post('/api/answer/commit', this.myAnswer)
@@ -709,10 +809,23 @@ export default {
               message: '提交试卷成功！',
               type: 'success'
             })
+            let flage=false;
+            for(var i=0;i<this.paperScores.length;i++){
+              if(this.paperScores[i]!=1&&this.paperScores[i]!=2&&this.paperScores[i]!=3&&this.paperScores[i]!=4){
+                flage=false;
+              }else{
+                flage=true;
+              }
+            }
             this.score.examid = this.$route.query.examid;
             this.score.stuid = this.$cookies.get("cid");
             this.score.course = this.examData.course.couname;
             this.score.objscore = finalScore;
+            if(flage){
+              this.score.subscore=0;
+              this.score.totalscore=this.score.objscore
+              this.score.ispreview=1
+            }
             this.score.answerdate = this.endTime;
             //提交成绩信息
             this.$axios.post('/api/score/add', this.score).then(res => {
@@ -770,6 +883,10 @@ export default {
         }).then(() => {
           if(!this.isPractice) {
             console.log("交卷")
+            for(var i=0;i<this.captures.length;i++){
+              this.pictureFile.push(this.dataURLtoFile (this.captures[i], "picture"+i))
+            }
+           /* console.log(this.pictureFile)*/
             this.endTime = this.format(new Date(), "yyyy-MM-dd HH:mm:ss");
             //提交答题信息
             this.$axios.post('/api/answer/commit', this.myAnswer)
@@ -779,10 +896,24 @@ export default {
                           message: '提交试卷成功！',
                           type: 'success'
                         })
+                        let flage=false;
+                        for(var i=0;i<this.paperScores.length;i++){
+                          if(this.paperScores[i]!=1&&this.paperScores[i]!=2&&this.paperScores[i]!=3&&this.paperScores[i]!=4){
+                            flage=false;
+                          }else{
+                            flage=true;
+                          }
+                        }
+                        console.log(flage)
                         this.score.examid = this.$route.query.examid;
                         this.score.stuid = this.$cookies.get("cid");
                         this.score.course = this.examData.course.couname;
                         this.score.objscore = finalScore;
+                        if(flage){
+                          this.score.subscore=0;
+                          this.score.totalscore=this.score.objscore
+                          this.score.ispreview=1
+                        }
                         this.score.answerdate = this.endTime;
                         //提交成绩信息
                         this.$axios.post('/api/score/add', this.score).then(res => {
@@ -817,37 +948,6 @@ export default {
         })
       }
     },
-    showTime() { //倒计时
-     /* const time1=setInterval(() => {
-        if(this.$cookies.get("Endtime")!=null||this.$cookies.get("Endtime")!=undefined){
-          this.time=this.$cookies.get("Endtime")
-          console.log(this.time)
-        }
-        this.time -= 1
-        if(this.time == 10) {
-          this.$message({
-            showClose: true,
-            type: 'error',
-            message: '考生注意,考试时间还剩10分钟！！！'
-          })
-          if(this.time == 0) {
-            console.log("考试时间已到,强制交卷。")
-            this.Autcommit();
-          }
-        }
-      },1000 * 60)
-      if(this.time>=0) {
-        const time2 = setInterval(() => {
-          this.Autcommit2();//保存试卷的操作
-        }, 50000)
-      }else{
-
-      }*/
-    },
-  /*  // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-    this.$once('hook:beforeDestroy', () => {
-      clearInterval(time1);
-    })*/
   },
   computed:mapState(["isPractice"])
 }
@@ -1148,4 +1248,61 @@ export default {
   width: 200px;
   text-align: left;
 }
+</style>
+<style lang="scss" scoped>
+  .camera_outer{
+    position: relative;
+    overflow: hidden;
+    background-size: 100%;
+    video,canvas,.tx_img{
+      -moz-transform:scaleX(-1);
+      -webkit-transform:scaleX(-1);
+      -o-transform:scaleX(-1);
+      transform:scaleX(-1);
+    }
+    .btn_camera{
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: rgba(0,0,0,0.3);
+      line-height: 50px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .bg_r_img{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+    }
+    .img_bg_camera{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      img{
+        width: 100%;
+        height: 100%;
+      }
+      .img_btn_camera{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        background-color: rgba(0,0,0,0.3);
+        color: #ffffff;
+        .loding_img{
+          width: 50px;
+          height: 50px;
+        }
+      }
+    }
+  }
 </style>
