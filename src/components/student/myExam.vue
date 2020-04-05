@@ -11,7 +11,8 @@
       <ul class="paper" v-loading="loading">
         <li class="item" v-if="pagination.records.length==0">
         <div class="info" v-if="pagination.records.length==0">
-          <span>暂无考试安排</span>
+          <h4><span>暂无考试安排</span></h4>
+          <p class="name"><span>请耐心等待</span></p>
         </div>
         </li>
         <li class="item" v-for="(item,index) in pagination.records" :key="index">
@@ -98,7 +99,7 @@ export default {
     },
     //搜索试卷
     search() {
-      this.$axios('/api/exam/exams').then(res => {
+      this.$axios(`/api/exam/exams/${0}`).then(res => {
         if(res.data.code == 200) {
           let allExam = res.data.data
           let newPage = allExam.filter(item => {

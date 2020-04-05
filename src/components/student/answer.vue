@@ -71,8 +71,8 @@
           <div class="content">
             <p class="topic"><el-tag type="success">{{number}} </el-tag> {{showQuestion}}  <span>{{"("+showScore+"分)"}}</span></p>
             <div v-if="currentType == 1">
-            <el-radio-group v-model="radio[singAnswer.quesid]"
-                            @change="getChangeLabel(currentType,singAnswer.quesid,radio[singAnswer.quesid],singAnswer.answer,showScore)" >
+            <el-radio-group v-model="radio[Index]"
+                            @change="getChangeLabel(currentType,singAnswer.quesid,radio[Index],singAnswer.answer,showScore)" >
               <el-tag>A：<el-radio  label="A">{{singAnswer.optiona}}</el-radio></el-tag>
               <el-tag>B：<el-radio  label="B">{{singAnswer.optionb}}</el-radio></el-tag>
               <el-tag>C：<el-radio  label="C">{{singAnswer.optionc}}</el-radio></el-tag>
@@ -87,13 +87,13 @@
             </div>
           </div>
             <div v-if="currentType == 2">
-              <el-radio-group v-model="checkbox[multAnswer.quesid]"
-                              @change="getChangeLabe2(currentType,multAnswer.quesid,checkbox[multAnswer.quesid],multAnswer.answer,showScore)" >
-                <el-tag>A：<el-checkbox label="A">{{multAnswer.optiona}}</el-checkbox></el-tag>
-                <el-tag>B：<el-checkbox label="B">{{multAnswer.optionb}}</el-checkbox></el-tag>
-                <el-tag>C：<el-checkbox label="C">{{multAnswer.optionc}}</el-checkbox></el-tag>
-                <el-tag>D：<el-checkbox label="D">{{multAnswer.optiond}}</el-checkbox></el-tag>
-              </el-radio-group>
+              <el-checkbox-group  v-model="checkboxAnswer" class="checkbox-group"
+                              @change="getChangeLabe2(currentType,multAnswer.quesid,checkboxAnswer,multAnswer.answer,showScore)" >
+                <el-tag>A：<el-checkbox  label="A">{{multAnswer.optiona}}</el-checkbox></el-tag>
+                <el-tag>B：<el-checkbox  label="B">{{multAnswer.optionb}}</el-checkbox></el-tag>
+                <el-tag>C：<el-checkbox  label="C">{{multAnswer.optionc}}</el-checkbox></el-tag>
+                <el-tag>D：<el-checkbox  label="D">{{multAnswer.optiond}}</el-checkbox></el-tag>
+              </el-checkbox-group>
               <div class="analysis" v-if="isPractice">
                 <ul>
                   <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{multAnswer.answer}}</span></li>
@@ -165,6 +165,7 @@
 <script>
 import store from '@/store/store'
 import {mapState} from 'vuex'
+import Vue from 'vue'
 export default {
   store,
   data() {
@@ -184,7 +185,11 @@ export default {
       currentType: 1, //当前题型类型  1--选择题  2--填空题  3--判断题
 
       radio: [], //保存考生所有单项选择题的选项
-      checkbox:[],//保存考生所有多项选择题的选项
+      /*checkbox:{
+      },//保存考生所有多项选择题的选项*/
+      checkbox:[[]],
+      checkboxAnswer:[],//保存考生所有多项选择题的选项
+      box: new Map(), //实车进度条数据数组
       fill:[],//保存考生所有填空题题的选项
       judge:[],//保存考生所有判断题的选项
       short:[],//保存考生所有简答题等的选项
@@ -567,6 +572,14 @@ export default {
         this.number =index+1
         } else if (questype == 2) {
           this.Index = index
+          let len = this.paperScores[questype].quesnum
+          let father = []
+          for(let i = 0; i < len; i++) { //根据填空题数量创建二维空数组存放每道题答案
+            let children =this.checkboxAnswer
+            father.push(children)
+          }
+          this.checkbox=father;
+          console.log(this.checkbox)
           let quesAnswer = this.topic[questype][this.Index]
           this.multAnswer = quesAnswer
           this.isFillClick = true
@@ -635,6 +648,7 @@ export default {
       console.log(this.myAnswer)
     },
     getChangeLabe2(questype,quesid,myanswer,rightAnswer,score) { //获取多项选择题作答选项
+      console.log(myanswer)
       if(questype && quesid && myanswer && rightAnswer &&score) {
         console.log(questype,quesid,myanswer)
         let data = this.topic[questype]
@@ -898,7 +912,9 @@ export default {
                         })
                         let flage=false;
                         for(var i=0;i<this.paperScores.length;i++){
-                          if(this.paperScores[i]!=1&&this.paperScores[i]!=2&&this.paperScores[i]!=3&&this.paperScores[i]!=4){
+                          console.log(this.paperScores[i].questype)
+                          if(this.paperScores[i].questype!=1&&this.paperScores[i].questype!=2
+                                  &&this.paperScores[i].questype!=3&&this.paperScores[i].questype!=4){
                             flage=false;
                           }else{
                             flage=true;
@@ -954,6 +970,10 @@ export default {
 </script>
 
 <style lang="scss">
+  .checkbox-group{
+    display: flex;
+    flex-direction: column;
+  }
 .iconfont.icon-time {
   color: #2776df;
   margin: 0px 6px 0px 20px;

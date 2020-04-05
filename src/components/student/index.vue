@@ -4,7 +4,7 @@
     <el-row class="padding-50">
       <el-col :span="24">
         <ul class="list">
-          <li class="logo"><i class="iconfont iconkaoshi"></i><span>CQC-OnlineExam</span></li>
+          <li class="logo"><i class="iconfont iconkaoshi"></i><span>CQC-EXAM</span></li>
           <li><a href="javascript:;" @click="exam()">在线考试</a></li>
           <li><a href="javascript:;" @click="practice()">在线练习</a></li>
           <li><router-link to="/scoreTable">考试记录</router-link></li>

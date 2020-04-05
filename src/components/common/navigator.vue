@@ -1,5 +1,5 @@
 <template>
-    <div id="nav">
+    <div class='bread_container' id="nav">
         <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item class="title">{{active.title}}</el-breadcrumb-item>
             <el-breadcrumb-item v-if="active.item1 != null">{{active.item1}}</el-breadcrumb-item>

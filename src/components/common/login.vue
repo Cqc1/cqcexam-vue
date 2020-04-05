@@ -4,8 +4,8 @@
         <transition name="form-fade" mode="in-out">
             <section class="form_contianer">
                 <div class='titleArea rflex'>
-                    <img class="logo" :src="logo" alt="小爱admin">
-                    <span class='title'>在线考试系统<i>CQC</i></span>
+                    <img class="logo" :src="logo" alt="南京工程学院">
+                    <span class='title'>CQC<i>在线考试系统</i></span>
                 </div>
                 <div><el-form :model="loginForm" :rules="rules" ref="loginForm" class="loginForm">
                     <el-form-item prop="username" class="login-item">
@@ -38,7 +38,7 @@
 </template>
 
 <script>
-    import logoImg from "@/assets/img/logo.png";
+    import logoImg from "@/assets/img/logo.jpg";
     import store from '@/store/store'
     import { login } from "@/api/user";
     import { setToken } from '@/utils/auth'
@@ -88,6 +88,7 @@
                                         this.$cookies.set("cname", resData.adminname)
                                         this.$cookies.set("cid", resData.adminid)
                                         this.$cookies.set("role", 0)
+                                        let redirect=decodeURIComponent(this.$route.query.redirect||'/')
                                         setToken("Token",resData.token)
                                         // this.$store.dispatch('initLeftMenu'); //设置左边菜单始终为展开状态
                                         this.$router.push({path: '/index'}) //跳转到首页

@@ -14,8 +14,8 @@
                     <transition name="fade">
                         <div class="out" ref="out" v-show="login_flag">
                             <ul>
-                                <li><a href="javascript:;">用户信息</a></li>
-                                <li><a href="javascript:;">设置</a></li>
+                                <li @click="Info()"><a href="javascript:;">用户信息</a></li>
+                                <li @click="upPwd()"><a href="javascript:;">修改密码</a></li>
                                 <li class="exit" @click="exit()"><a href="javascript:;">退出登录</a></li>
                             </ul>
                         </div>
@@ -23,6 +23,49 @@
                 </div>
             </el-col>
         </el-row>
+        <!--&lt;!&ndash; 编辑对话框&ndash;&gt;
+        <el-dialog
+                title="编辑或修改信息"
+                :visible.sync="dialogVisible"
+                width="30%"
+                :before-close="handleClose">
+            <section class="update">
+                <el-form ref="form" :model="form" label-width="80px">
+                    <el-form-item label="学号">
+                        <el-input v-model="form.stuid" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名">
+                        <el-input v-model="form.stuname" ></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input v-model="form.stupwd"></el-input>
+                    </el-form-item>
+                    <el-form-item  label="所属班级">
+                        <el-select v-model="form.clazzid" :placeholder="form.clazz.calname" @change="change()">
+                            <el-option
+                                    v-for="item in Clazzs"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="性别">
+                        <el-input v-model="form.sex"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱">
+                        <el-input v-model="form.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话号码">
+                        <el-input v-model="form.tel"></el-input>
+                    </el-form-item>
+                </el-form>
+            </section>
+            <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submit()">确 定</el-button>
+      </span>
+        </el-dialog>-->
     </header>
 </template>
 
@@ -32,6 +75,7 @@
     export default {
         data() {
             return {
+                dialogVisible: false, //对话框
                 login_flag: false,
                 user: { //用户信息
                     userName: null,
@@ -58,6 +102,26 @@
             },
             index() {
                 this.$router.push({path: '/index'})
+            },
+            exit() {
+                let role = this.$cookies.get("role")
+                this.$router.push({path:"/"}) //跳转到登录页面
+                this.$cookies.remove("cname") //清除cookie
+                this.$cookies.remove("cid")
+                this.$cookies.remove("role")
+                if(role == 0) {
+                    this.menu.pop()
+                }
+            },
+            exit() {
+                let role = this.$cookies.get("role")
+                this.$router.push({path:"/"}) //跳转到登录页面
+                this.$cookies.remove("cname") //清除cookie
+                this.$cookies.remove("cid")
+                this.$cookies.remove("role")
+                if(role == 0) {
+                    this.menu.pop()
+                }
             },
             exit() {
                 let role = this.$cookies.get("role")

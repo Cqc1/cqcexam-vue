@@ -20,13 +20,14 @@
 
                 <el-form-item class="btnRight">
                     <el-button type="primary" size ="mini" icon="view" @click='onBatchDelTeacher(sels)' :disabled="this.sels.length === 0||this.disabled" >批量删除</el-button>
-                    <el-button type="success" size ="mini" icon="view">导出Elcel</el-button>
+                    <el-button type="success" size ="mini" icon="view" @click="downloadList">导出Elcel</el-button>
                     <!--                    <el-button type="primary" size ="mini" icon="view" @click='onAddStudent()'>添加</el-button>-->
                 </el-form-item>
             </el-form>
         </div>
         <div class="table_container">
             <el-table
+                    id="outTable"
                     v-loading="loading"
                     :data="tableData" style="width: 100%"
                     align='center'
@@ -115,6 +116,8 @@
 </template>
 
 <script>
+    import FileSaver from 'file-saver'
+    import XLSX from 'xlsx'
     export default {
         data(){
             return {
@@ -253,6 +256,17 @@
                 this.$axios(`/api/teacher/${teacherId}`).then(res => {
                     this.form = res.data.data
                 })
+            },
+            //导出
+            downloadList:function(){
+                let vb = XLSX.utils.table_to_book(document.getElementById('outTable'));
+                let vbout = XLSX.write(vb, {bookType: 'xlsx', bookSST: true, type: 'array'});
+                try {
+                    FileSaver.saveAs(new Blob([vbout], {type: 'application/octet-stream'}), '教师名单.xlsx');
+                } catch (e) {
+                    if (typeof console !== 'undefined') console.log(e, vbout);
+                }
+                return vbout;
             },
             submit() { //提交更改
                 this.dialogVisible = false

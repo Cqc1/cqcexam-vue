@@ -1,7 +1,35 @@
 // 所有学生
 <template>
   <div class="all">
-    <el-table :data="pagination.records" align='center' border>
+    <div class="search_container searchArea">
+      <el-form
+              :inline="true"
+              class="demo-form-inline search-form">
+        <el-form-item>
+          <div class="searchWord el-form-item">
+            <el-input class="el-form-item__content search-input" v-model="search" placeholder="请输入搜索内容">
+            </el-input>
+            <i class="el-icon-search search-icon"></i>
+          </div>
+        </el-form-item>
+        <el-form-item class="btnRight">
+          <el-button type="primary" size ="mini" icon="view" @click='onBatchDelScore(sels)' :disabled="this.sels.length === 0||this.disabled" >批量删除</el-button>
+          <el-button type="success" size ="mini" icon="view" @click="downloadList">导出Elcel</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <el-table
+            id="outTable"
+            v-loading="loading"
+            :data="tables" style="width: 100%"
+            align='center'
+            @selection-change="selsChange"
+            ref="table"
+            stripe :default-sort="{prop: 'createAt', order: 'descending'}">
+      <el-table-column v-if="idFlag" prop="scoreid" label="scoreid" align='center'>
+      </el-table-column>
+      <el-table-column type="selection" align='center'>
+      </el-table-column>
       <el-table-column align='center' fixed="left" prop="stuid" label="学号" width="180"></el-table-column>
       <el-table-column align='center' prop="student.stuname" label="姓名" width="150"></el-table-column>
       <el-table-column align='center' prop="instituname" label="学院" width="150"></el-table-column>
@@ -73,9 +101,19 @@
 </template>
 
 <script>
+  import FileSaver from 'file-saver'
+  import XLSX from 'xlsx'
 export default {
   data() {
     return {
+      tableData: [],
+      sort: 'createAt',
+      order: 'descending',
+      sels: [],//选中显示的值
+      disabled:true,
+      loading:true,
+      idFlag:false,
+      search:'',//用于模糊查询
       pagination: {
         //分页后的考试信息
         current: 1, //当前页
@@ -95,6 +133,9 @@ export default {
       //分页查询所有试卷信息
       this.$axios(`/api/score/findAll/${this.pagination.current}/${this.pagination.size}`).then(res => {
         this.pagination = res.data.data;
+        this.loading = false;
+        this.tableData=[];
+        this.tableData = this.pagination.records;
       }).catch(error => {});
     },
     //改变当前记录条数
@@ -120,6 +161,17 @@ export default {
         this.form = res.data.data
       })
     },
+    //导出
+    downloadList:function(){
+      let vb = XLSX.utils.table_to_book(document.getElementById('outTable'));
+      let vbout = XLSX.write(vb, {bookType: 'xlsx', bookSST: true, type: 'array'});
+      try {
+        FileSaver.saveAs(new Blob([vbout], {type: 'application/octet-stream'}), '所有学生成绩名单.xlsx');
+      } catch (e) {
+        if (typeof console !== 'undefined') console.log(e, vbout);
+      }
+      return vbout;
+    },
     submit() { //提交更改
       this.dialogVisible = false
       this.form.totalscore=(this.form.objscore-0)+(this.form.subscore-0)
@@ -140,8 +192,31 @@ export default {
         this.getScoreInfo();
       })
     },
+    //批量删除
+    onBatchDelScore(rows){
+      var ids = [];
+      rows.forEach(element =>{
+        ids.push(element.scoreid)
+        console.log("====="+element.scoreid);
+      })
+      const param = ids.join(','); // 把数组项拼接成字符串，以逗号,分隔
+      this.$confirm('确定要删除选中的文件吗?','提示').then(() =>{
+        this.$axios({
+          url: `/api/score/deleteByIds/${param}`,
+          method: 'delete',
+        }).then(res => {
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          })
+          console.log("====="+ids);
+          this.pagination.current=1;
+          this.getScoreInfo()
+        })
+      }).catch(() => {})
+    },
     //删除操作方法
-    removeScore(scoreId) { //删除当前班级
+  removeScore(scoreId) { //删除当前班级
       this.$confirm('确认删除该记录吗?', '提示').then(() => {
         this.$axios({
           url: `/api/score/delete/${scoreId}`,
@@ -156,6 +231,35 @@ export default {
           this.pagination.current=1
         })
       }).catch(() => {})
+    },
+    handleClose(done) { //关闭提醒
+      this.$confirm('确认关闭？')
+              .then(_ => {
+                done();
+              }).catch(_ => {});
+    },
+    selsChange(sels) {
+      //被选中的行组成数组
+      this.sels = sels;
+      //遍历被选中行数所组成的数组
+      for(let element of this.sels){
+        //按钮可用
+        this.disabled = false;
+      }
+    },
+  },
+  computed: {
+    // 模糊搜索
+    tables() {
+      const search = this.search;
+      if (search) {
+        return this.tableData.filter(data => {
+          return Object.keys(data).some(key => {
+            return String(data[key]).toLowerCase().indexOf(search) > -1
+          })
+        })
+      }
+      return this.tableData
     },
   }
 };
@@ -183,4 +287,55 @@ export default {
 .el-table .success-row {
   background: #dd5862;
 }
+</style>
+<style lang="less" scoped>
+  .search_container{
+    margin-bottom: 20px;
+  }
+  .btnRight{
+    float: right;
+    margin-right: 0px !important;
+  }
+  .searchArea{
+    background: rgb(253, 253, 253);
+    border-radius:1px;
+    padding: 1px 10px 0;
+  }
+  .table_container{
+    padding: 10px;
+    background: #fff;
+    border-radius: 2px;
+  }
+  .el-dialog--small{
+    width: 600px !important;
+  }
+  .pagination{
+    text-align: left;
+    margin-top: 10px;
+  }
+
+  .searchWord {
+    display: inline-block;
+    width: 210px;
+    position: relative;
+  }
+
+  .searchWord .search-input {
+    display: inline-block;
+    width: 200px;
+    position: relative;
+  }
+  .searchWord .search-icon {
+    position: absolute;
+    top: 13px;
+    left: 10px;
+    font-size: 14px;
+    color: #409eff;
+  }
+</style>
+<style>
+  .searchWord .search-input input[autocomplete="off"],
+  .searchWord .search-input input[autocomplete="off"].el-input__inner {
+    padding-left: 30px !important;
+  }
 </style>

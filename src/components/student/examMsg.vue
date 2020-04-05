@@ -93,7 +93,7 @@ export default {
     init() {
       let examCode = this.$route.query.examid //获取路由传递过来的试卷编号
       this.$axios(`/api/exam/selectById/${examCode}`).then(res => {  //通过examCid请求试卷详细信息
-        res.data.data.exdate = res.data.data.exdate.substr(0,10)
+        /*res.data.data.exdate = res.data.data.exdate.substr(0,10)*/
         this.examData = { ...res.data.data}
         let paperId = this.examData.paperid
         this.$axios(`/api/que_paper/score/${paperId}`).then(res => {  //通过paperId获取试题题目信息

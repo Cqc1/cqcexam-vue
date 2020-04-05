@@ -19,13 +19,16 @@
 
                 <el-form-item class="btnRight">
                     <el-button type="primary" size ="mini" icon="view" @click='onBatchDelStudent(sels)' :disabled="this.sels.length === 0||this.disabled" >批量删除</el-button>
-                    <el-button type="success" size ="mini" icon="view">导出Elcel</el-button>
-<!--                    <el-button type="primary" size ="mini" icon="view" @click='onAddStudent()'>添加</el-button>-->
+                    <el-button type="success" size ="mini" icon="view" @click="downloadList">导出Elcel</el-button>
+                </el-form-item>
+                <el-form-item >
+                    <vue-xlsx-table @on-select-file="selectExcel" size ="mini" icon="view" type="success">批量导入</vue-xlsx-table>
                 </el-form-item>
             </el-form>
         </div>
         <div class="table_container">
             <el-table
+                    id="outTable"
                     v-loading="loading"
                     :data="tableData" style="width: 100%"
                     align='center'
@@ -114,6 +117,8 @@
 </template>
 
 <script>
+    import FileSaver from 'file-saver'
+    import XLSX from 'xlsx'
     export default {
         data(){
             return {
@@ -180,7 +185,6 @@
                                     this.pagination.total = res.data.data.length;
                                     this.tableData=[];
                                     this.tableData.push(res.data.data);
-                                    this.tableData=res.data
                                     this.$message({
                                         message: '查询成功',
                                         type: 'success'
@@ -257,6 +261,64 @@
                     this.form = res.data.data
                 })
             },
+            //导出
+            downloadList:function(){
+                let vb = XLSX.utils.table_to_book(document.getElementById('outTable'));
+
+                let vbout = XLSX.write(vb, {bookType: 'xlsx', bookSST: true, type: 'array'});
+
+                try {
+
+                    FileSaver.saveAs(new Blob([vbout], {type: 'application/octet-stream'}), '学生名单.xlsx');
+                } catch (e) {
+                    if (typeof console !== 'undefined') console.log(e, vbout);
+                }
+                return vbout;
+            },
+            selectExcel(convertedData) {    //批量导入
+            //可以打印一下看convertedData有哪些东西
+                console.log(convertedData);
+                let data=convertedData.body;
+                this.excelList=[];
+                data.forEach((item)=> {
+                    let dataitem={
+                        stuid: item.学生学号,
+                        stuname: item.学生姓名,
+                        sex: item.性别,
+                        clazzid: item.班级,
+                        email:item.电子邮箱,
+                        tel: item.电话号码,
+                    };
+                    this.excelList.push(dataitem)
+                });
+                for(var i=0;i<this.excelList.length;i++){
+                    for(var j=0;j<this.Clazzs.length;j++) {
+                        if (this.excelList[i].clazzid == this.Clazzs[j].label) {
+                            this.excelList[i].clazzid=this.Clazzs[j].value
+                        }
+                    }
+                }
+                this.$axios.post('/api/studentAll',this.excelList)
+                .then(res => {
+                    //这是我自己封装过的axios请求，按自己的发送请求就行了
+                    if(res.data.code==200) {
+                        this.$message({
+                            message: '导入成功！',
+                            type: 'success'
+                        });
+                        this.getStudentInfo();
+                        //我这里是在保存成功后请求了一遍列表接口，用来刷新列表
+                    }else{
+                        this.$message({
+                            message: res.data.message,
+                            type: 'error'
+                        });
+                        this.getStudentInfo();
+                    }
+
+                });
+            },
+
             submit() { //提交更改
                 this.dialogVisible = false
                 this.$axios({
@@ -342,6 +404,7 @@
     .btnRight{
         float: right;
         margin-right: 0px !important;
+
     }
     .searchArea{
         background: rgb(253, 253, 253);

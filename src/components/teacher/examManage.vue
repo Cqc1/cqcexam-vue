@@ -192,9 +192,17 @@
                     <el-form-item label="考试介绍：">
                         <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
                     </el-form-item>
-                    <el-form-item label="是否已考：">
-                        <span v-if="form.isexam==1">已考</span>
-                        <span v-if="form.isexam==0">未考</span>
+                    <el-form-item  label="考试类型">
+                        <div class="block">
+                            <el-select v-model="form.isexam"  placeholder="请选择考试类型">
+                                <el-option
+                                        v-for="item in types"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
                     </el-form-item>
                 </el-form>
             </section>
@@ -284,6 +292,20 @@
                         instuname:'',
                     }
                 },
+                types: [ //考试类型
+                    {
+                        value: '0',
+                        label: '0-考试未考'
+                    },
+                    {
+                        value: '1',
+                        label: '1-考试已考'
+                    },
+                    {
+                        value: '2',
+                        label: '2-练习考试'
+                    },
+                ],
                 checkDate:'',
                 objarr:[],
             }
