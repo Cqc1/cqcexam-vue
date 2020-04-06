@@ -66,7 +66,7 @@
           <div class="title">
             <p>{{title}}</p>
             <i class="iconfont icon-right auto-right"></i>
-            <span>全卷共{{paperQuesNum}}题  <i class="iconfont icon-time"></i>倒计时：<b>{{time}}</b>分钟</span>
+            <span>全卷共{{paperQuesNum/2}}题  <i class="iconfont icon-time"></i>倒计时：<b>{{time}}</b>分钟</span>
           </div>
           <div class="content">
             <p class="topic"><el-tag type="success">{{number}} </el-tag> {{showQuestion}}  <span>{{"("+showScore+"分)"}}</span></p>
@@ -239,6 +239,7 @@ export default {
       showAnswer: {}, //当前题目对应的答案选项
       number: 1, //题号
       multAnswer:[],//多选题
+      mult:[],//用来保存多选题答案
       fillAnswer: [[]], //二维数组保存所有填空题答案
       judgeAnswer: [], //保存所有判断题答案
       shortAnswer:[],//简答等其他题型
@@ -572,14 +573,12 @@ export default {
         this.number =index+1
         } else if (questype == 2) {
           this.Index = index
-          let len = this.paperScores[questype].quesnum
-          let father = []
-          for(let i = 0; i < len; i++) { //根据填空题数量创建二维空数组存放每道题答案
-            let children =this.checkboxAnswer
-            father.push(children)
+          if(this.mult[this.Index]!=undefined){
+            console.log(this.mult[this.Index])
+            this.checkboxAnswer=this.mult[this.Index].split(',')
+          }else{
+            this.checkboxAnswer=[];
           }
-          this.checkbox=father;
-          console.log(this.checkbox)
           let quesAnswer = this.topic[questype][this.Index]
           this.multAnswer = quesAnswer
           this.isFillClick = true
@@ -649,22 +648,24 @@ export default {
     },
     getChangeLabe2(questype,quesid,myanswer,rightAnswer,score) { //获取多项选择题作答选项
       console.log(myanswer)
+      console.log(myanswer.toString())
       if(questype && quesid && myanswer && rightAnswer &&score) {
         console.log(questype,quesid,myanswer)
+        this.mult[this.Index]=myanswer.toString()
         let data = this.topic[questype]
         data[this.Index]["isClick"] = true
         /* 保存学生答题选项 */
         this.myAnswer.forEach(item => {
           if (item.questype == questype && item.quesid == quesid) {
             /*this.$set({questype: questype, quesid: quesid, answer: myanswer})*/
-            item.questype=questype;item.quesid=quesid;item.answer=myanswer;
+            item.questype=questype;item.quesid=quesid;item.answer=this.mult[this.Index];
             console.log("this.myAnswer")
           }
         })
         if(!this.result2[quesid]){
           console.log(questype,quesid,myanswer)
           this.myAnswer.push({examid:this.$route.query.examid,stuid: this.$cookies.get("cid"),
-            questype: questype, quesid: quesid, answer: myanswer, rightAnswer:rightAnswer,score:score})
+            questype: questype, quesid: quesid, answer: this.mult[this.Index], rightAnswer:rightAnswer,score:score})
           this.bg_flag = true
           this.result2[quesid]=true
         }
@@ -799,10 +800,30 @@ export default {
       /* 计算客观题总分 */
       let finalScore = 0
       this.myAnswer.forEach((element,index) => { //循环每道选择题根据选项计算分数
-        if(element != null&&(element.questype==1||element.questype==2||element.questype==3||element.questype==4)) {
+        if(element != null&&(element.questype==1||element.questype==3||element.questype==4)) {
           if (element.answer.trim() == element.rightAnswer.trim()) {
             console.log(element.answer.trim()== element.rightAnswer.trim())
             finalScore += element.score
+          }
+        }else if(element != null&&element.questype==2){
+          let arry=[];
+          for(var i=0;i<element.rightAnswer.length;i++){
+             arry[i]=element.rightAnswer.charAt(i);
+          }
+          let check=true;
+          let ansew=[];
+          ansew=element.answer.split(',')
+          console.log(ansew,arry)
+          if(arry.length==ansew.length){
+            for (var i = 0; i < arry.length; i++) {
+              if (arry.indexOf(ansew[i]) == -1) {
+                check=false;
+              }
+            }
+            console.log(check)
+            if(check){
+              finalScore += element.score
+            }
           }
         }
         // console.log(topic1Answer)
@@ -825,16 +846,20 @@ export default {
             })
             let flage=false;
             for(var i=0;i<this.paperScores.length;i++){
-              if(this.paperScores[i]!=1&&this.paperScores[i]!=2&&this.paperScores[i]!=3&&this.paperScores[i]!=4){
+              console.log(this.paperScores[i].questype)
+              if(this.paperScores[i].questype!=1&&this.paperScores[i].questype!=2
+                      &&this.paperScores[i].questype!=3&&this.paperScores[i].questype!=4){
                 flage=false;
               }else{
                 flage=true;
               }
             }
+            console.log(flage)
             this.score.examid = this.$route.query.examid;
             this.score.stuid = this.$cookies.get("cid");
             this.score.course = this.examData.course.couname;
             this.score.objscore = finalScore;
+            this.score.ispreview=0
             if(flage){
               this.score.subscore=0;
               this.score.totalscore=this.score.objscore
@@ -880,10 +905,30 @@ export default {
       /* 计算客观题总分 */
       let finalScore = 0
       this.myAnswer.forEach((element,index) => { //循环每道选择题根据选项计算分数
-        if(element != null&&(element.questype==1||element.questype==2||element.questype==3||element.questype==4)) {
+        if(element != null&&(element.questype==1||element.questype==3||element.questype==4)) {
           if (element.answer.trim() == element.rightAnswer.trim()) {
             console.log(element.answer.trim()== element.rightAnswer.trim())
             finalScore += element.score
+          }
+        }else if(element != null&&element.questype==2){
+          let arry=[];
+          for(var i=0;i<element.rightAnswer.length;i++){
+            arry[i]=element.rightAnswer.charAt(i);
+          }
+          let check=true;
+          let ansew=[];
+          ansew=element.answer.split(',')
+          console.log(ansew,arry)
+          if(arry.length==ansew.length){
+            for (var i = 0; i < arry.length; i++) {
+              if (arry.indexOf(ansew[i]) == -1) {
+                check=false;
+              }
+            }
+            console.log(check)
+            if(check){
+              finalScore += element.score
+            }
           }
         }
         // console.log(topic1Answer)
@@ -925,6 +970,7 @@ export default {
                         this.score.stuid = this.$cookies.get("cid");
                         this.score.course = this.examData.course.couname;
                         this.score.objscore = finalScore;
+                        this.score.ispreview=0
                         if(flage){
                           this.score.subscore=0;
                           this.score.totalscore=this.score.objscore

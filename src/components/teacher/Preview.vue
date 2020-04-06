@@ -126,16 +126,44 @@
                 let stuid = this.$route.query.stuid
                 //不分页查询所有答案信息
                 this.$axios(`/api/answer/preview/${examid}/${stuid}`).then(res => {
-                    this.answer = {...res.data.data}
-                    for(var i=0;i<res.data.data.length;i++){
-                        this.arryLength+=1
-                        this.getScore[i]='';
+                    if(res.data.code==404){
+                        let scoreid = this.$route.query.scoreid
+                        let examid = this.$route.query.examid
+                        this.$axios(`/api/score/selectById/${scoreid}`).then(res => {
+                            this.score = res.data.data
+                            this.score.subscore=0
+                            this.score.totalscore=Number(this.score.subscore)+Number(this.score.objscore)
+                            this.score.ispreview=1
+                            var param=this.score;
+                            console.log(param);
+                            this.$axios.put(`/api/score/update`,param).then(res => {
+                                if(res.data.code==200){
+                                    this.$message({
+                                        message: '该考生未答非客观题，已直接判为0分!',
+                                        type: 'warning'
+                                    })
+                                    this.$router.push({path: '/teaPreview', query:{examid: examid}})
+                                }else{
+                                    this.$message({
+                                        message: '批阅失败!',
+                                        type: 'error'
+                                    })
+                                }
+                            }).catch(error => {});
+                        }).catch(error => {});
+                    }else {
+                        this.answer = {...res.data.data}
+                        for (var i = 0; i < res.data.data.length; i++) {
+                            this.arryLength += 1
+                            this.getScore[i] = '';
+                        }
+                        console.log(this.arryLength);
+                        this.showQuestion = this.answer[0];
+                        this.$axios(`/api/selectOne/${this.showQuestion.questype}/${this.showQuestion.quesid}`).then(res => {
+                            this.currentQues = {...res.data.data}
+                        }).catch(error => {
+                        });
                     }
-                    console.log(this.arryLength);
-                    this.showQuestion=this.answer[0];
-                    this.$axios(`/api/selectOne/${this.showQuestion.questype}/${this.showQuestion.quesid}`).then(res => {
-                        this.currentQues = {...res.data.data}
-                    }).catch(error => {});
                 }).catch(error => {});
             },
             //获取下拉框中的值
@@ -168,8 +196,8 @@
             },
             change(questype,quesid,index) { //单项选择题
                 this.$axios(`/api/selectOne/${questype}/${quesid}`).then(res => {
-                    this.currentQues = {...res.data.data}
-                    console.log(this.currentQues);
+                        this.currentQues = {...res.data.data}
+                        console.log(this.currentQues);
                 }).catch(error => {});
                 this.Index = index
                 let quesAnswer = this.answer[this.Index]
@@ -202,6 +230,7 @@
                 }
             },
             Submit() { //提交更改
+                let cont=true;
                 for(var i=0;i<this.getScore.length;i++){
                     if(this.getScore[i]!=null&&this.getScore[i]!=''){
                         console.log(this.getScore[i]);
@@ -209,13 +238,14 @@
                         this.commit=true;
                     }else{
                         this.commit=false;
+                        cont=false;
                         this.$message({
                             message: '请批阅完第'+`${i+1}`+'题后再提交!',
                             type: 'warning'
                         })
                     }
                 }
-                if(this.commit){
+                if(this.commit&&cont){
                     let scoreid = this.$route.query.scoreid
                     let examid = this.$route.query.examid
                     this.$axios(`/api/score/selectById/${scoreid}`).then(res => {
