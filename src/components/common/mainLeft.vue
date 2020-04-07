@@ -64,7 +64,7 @@
                     }, {
                         index: '8',
                         title: '学院管理',
-                        icon: 'iconkechengguanli',
+                        icon: 'iconxueyuan',
                         content:[{item1:'院系管理',path:'/instituteManage'},{item2: '专业管理',path: '/majorManage'},{item2: '班级管理',path: '/classManage'}],
                         },)
                 }
@@ -83,7 +83,7 @@
         color: #fff;
     }
     .left-width {
-        width: 130px;
+        width: 150px;
     }
     .el-menu-vertical-demo:not(.el-menu--collapse) {
         min-height: 900px;

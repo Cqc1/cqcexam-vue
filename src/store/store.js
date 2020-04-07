@@ -10,7 +10,7 @@ const state = {
   menu: [{
       index: '1',
       title: '考试管理',
-      icon: 'icon-kechengbiao',
+      icon: 'iconkaoshi2',
       content:[{item1:'考试查询',path:'examManage'},{item2:'添加考试',path:'/addExam'}],
     },
     {
@@ -22,19 +22,19 @@ const state = {
     {
       index: '3',
       title: '题库管理',
-      icon: 'icon-tiku',
+      icon: 'icontiku',
       content:[{item1:'试题类型管理',path:'/quesTypeManage'},{item2:'所有题库',path:'/quesManage'},{item3:'增加题库',path:'/addQues'}],
     },
     {
       index: '4',
       title: '成绩管理',
-      icon: 'icon-performance',
+      icon: 'iconchengjitubiao',
       content:[{item1:'学生成绩查询',path:'/allStudentsGrade'},{item2: '成绩统计查询',path: '/selectExamToPart'},{item2: '试卷批阅',path: '/paperReview'},{path: '/scorePart'},{path: '/teaPreview'},{path: '/Preview'}],
     },
     {
       index: '5',
       title: '课程管理',
-      icon: 'iconkechengguanli',
+      icon: 'iconkecheng',
       content:[{item1:'课程管理',path:'/courseManage'},{item2: '添加课程',path: '/addCourse'}],
     },
     {
