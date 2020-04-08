@@ -116,7 +116,9 @@ module.exports = {
 
             "/api": {
 
-                target: "http://localhost:8085",// 要访问的接口域名
+                /*target: "http://localhost:8085",// 要访问的接口域名*/
+
+                target: "http://47.106.77.197:8085",// 要访问的接口域名
 
                 ws: true,// 是否启用websockets
 
