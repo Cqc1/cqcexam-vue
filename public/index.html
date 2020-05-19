@@ -3,37 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="renderer" content="webkit">
+  <!--<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="renderer" content="webkit">-->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes">
 
-
-  <!-- 启用360浏览器的极速模式(webkit) -->
+  <!--&lt;!&ndash; 启用360浏览器的极速模式(webkit) &ndash;&gt;
   <meta name="renderer" content="webkit">
-  <!-- 避免IE使用兼容模式 -->
+  &lt;!&ndash; 避免IE使用兼容模式 &ndash;&gt;
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 -->
+  &lt;!&ndash; 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 &ndash;&gt;
   <meta name="HandheldFriendly" content="true">
-  <!-- 微软的老式浏览器 -->
+  &lt;!&ndash; 微软的老式浏览器 &ndash;&gt;
   <meta name="MobileOptimized" content="320">
-  <!-- uc强制竖屏 -->
+  &lt;!&ndash; uc强制竖屏 &ndash;&gt;
   <meta name="screen-orientation" content="portrait">
-  <!-- QQ强制竖屏 -->
+  &lt;!&ndash; QQ强制竖屏 &ndash;&gt;
   <meta name="x5-orientation" content="portrait">
-  <!-- UC强制全屏 -->
+  &lt;!&ndash; UC强制全屏 &ndash;&gt;
   <meta name="full-screen" content="yes">
-  <!-- QQ强制全屏 -->
+  &lt;!&ndash; QQ强制全屏 &ndash;&gt;
   <meta name="x5-fullscreen" content="true">
-  <!-- UC应用模式 -->
+  &lt;!&ndash; UC应用模式 &ndash;&gt;
   <meta name="browsermode" content="application">
-  <!-- QQ应用模式 -->
+  &lt;!&ndash; QQ应用模式 &ndash;&gt;
   <meta name="x5-page-mode" content="app">
-  <!-- windows phone 点击无高光 -->
+  &lt;!&ndash; windows phone 点击无高光 &ndash;&gt;
   <meta name="msapplication-tap-highlight" content="no">
   <meta content="telephone=no" name="format-detection" />
-  <meta name="huaban" content="nopin" />
-
-
+  <meta name="huaban" content="nopin" />-->
 
   <title>cqc在线考试系统</title>
   <link rel="stylesheet" href="//at.alicdn.com/t/font_987928_pqv3jkd52jl.css">
@@ -48,104 +45,12 @@
 </head>
 <body>
 <div id="app">
-
   <!-- 使用CDN加速的JS文件，配置在vue.config.js下 -->
   <script src="//at.alicdn.com/t/font_1258069_e40c6mwl0x8.js"></script>
   <% for (var i in
   htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.js) { %>
   <script src="<%= htmlWebpackPlugin.options.cdn.js[i] %>"></script>
   <% } %>
-
-  <script>
-    var deviceWidth = parseInt(window.screen.width);  //获取当前设备的屏幕宽度
-    var deviceScale = deviceWidth / 640;  //得到当前设备屏幕与640之间的比例，之后我们就可以将网页宽度固定为640px
-    var ua = navigator.userAgent;
-    //获取当前设备类型（安卓或苹果）
-    if (/Android (\d+\.\d+)/.test(ua)) {
-      var version = parseFloat(RegExp.$1);
-      if (version > 2.3) {
-        document.write('<meta name="viewport" content="width=640,initial-scale=' + deviceScale + ', minimum-scale = ' + deviceScale + ', maximum-scale = ' + deviceScale + ', target-densitydpi=device-dpi">');
-      } else {
-        document.write('<meta name="viewport" content="width=640,initial-scale=0.75,maximum-scale=0.75,minimum-scale=0.75,target-densitydpi=device-dpi" />');
-      }
-    } else {
-      document.write('<meta name="viewport" content="width=640, user-scalable=no">');
-    }
-    //得到手机屏幕的宽度
-    let htmlWidth = document.documentElement.clientWidth || document.body.clientWidth;
-    console.log('htmlWidth',htmlWidth)
-    //得到html的Dom元素
-    let htmlDom = document.getElementsByTagName('html')[0];
-    // if(htmlWidth>640){//超过640大小的，字体根部都是16px
-    //   htmlWidth=640;
-    //   console.log('htmlWidth-true',htmlWidth)
-    // }
-    //设置根元素字体大小
-    htmlDom.style.fontSize = htmlWidth / 40 + 'px';
-    document.documentElement.style.fontSize = document.documentElement.clientWidth/10 + 'px';
-
-    (function (doc, win) {
-      var docEl = doc.documentElement,
-              resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
-              recalc = function () {
-                var clientWidth = docEl.clientWidth;
-                if (!clientWidth) return;
-                docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';//其中“20”根据你设置的html的font-size属性值做适当的变化
-              };
-
-      if (!doc.addEventListener) return;
-      win.addEventListener(resizeEvt, recalc, false);
-      doc.addEventListener('DOMContentLoaded', recalc, false);
-    })(document, window);
-
-
-  </script>
 </div>
-<!-- built files will be auto injected -->
 </body>
-  <script>
-    var deviceWidth = parseInt(window.screen.width);  //获取当前设备的屏幕宽度
-    var deviceScale = deviceWidth / 640;  //得到当前设备屏幕与640之间的比例，之后我们就可以将网页宽度固定为640px
-    var ua = navigator.userAgent;
-    //获取当前设备类型（安卓或苹果）
-    if (/Android (\d+\.\d+)/.test(ua)) {
-      var version = parseFloat(RegExp.$1);
-      if (version > 2.3) {
-        document.write('<meta name="viewport" content="width=640,initial-scale=' + deviceScale + ', minimum-scale = ' + deviceScale + ', maximum-scale = ' + deviceScale + ', target-densitydpi=device-dpi">');
-      } else {
-        document.write('<meta name="viewport" content="width=640,initial-scale=0.75,maximum-scale=0.75,minimum-scale=0.75,target-densitydpi=device-dpi" />');
-      }
-    } else {
-      document.write('<meta name="viewport" content="width=640, user-scalable=no">');
-    }
-    //得到手机屏幕的宽度
-    let htmlWidth = document.documentElement.clientWidth || document.body.clientWidth;
-    console.log('htmlWidth',htmlWidth)
-    //得到html的Dom元素
-    let htmlDom = document.getElementsByTagName('html')[0];
-    // if(htmlWidth>640){//超过640大小的，字体根部都是16px
-    //   htmlWidth=640;
-    //   console.log('htmlWidth-true',htmlWidth)
-    // }
-    //设置根元素字体大小
-    htmlDom.style.fontSize = htmlWidth / 40 + 'px';
-    document.documentElement.style.fontSize = document.documentElement.clientWidth/10 + 'px';
-
-    (function (doc, win) {
-      var docEl = doc.documentElement,
-              resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
-              recalc = function () {
-                var clientWidth = docEl.clientWidth;
-                if (!clientWidth) return;
-                docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';//其中“20”根据你设置的html的font-size属性值做适当的变化
-              };
-
-      if (!doc.addEventListener) return;
-      win.addEventListener(resizeEvt, recalc, false);
-      doc.addEventListener('DOMContentLoaded', recalc, false);
-    })(document, window);
-
-
-  </script>
-
 </html>

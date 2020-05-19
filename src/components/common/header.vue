@@ -23,49 +23,38 @@
                 </div>
             </el-col>
         </el-row>
-        <!--&lt;!&ndash; 编辑对话框&ndash;&gt;
+        <!-- 编辑对话框-->
         <el-dialog
-                title="编辑或修改信息"
+                title="个人详细信息"
                 :visible.sync="dialogVisible"
                 width="30%"
-                :before-close="handleClose">
+                >
             <section class="update">
                 <el-form ref="form" :model="form" label-width="80px">
-                    <el-form-item label="学号">
-                        <el-input v-model="form.stuid" :disabled="true"></el-input>
+                    <el-form-item label="帐号">
+                        <el-input v-model="form.id" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item label="姓名">
-                        <el-input v-model="form.stuname" ></el-input>
+                        <el-input v-model="form.name" :disabled="true"></el-input>
                     </el-form-item>
                     <el-form-item label="密码">
-                        <el-input v-model="form.stupwd"></el-input>
+                        <el-input v-model="form.pwd" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item  label="所属班级">
-                        <el-select v-model="form.clazzid" :placeholder="form.clazz.calname" @change="change()">
-                            <el-option
-                                    v-for="item in Clazzs"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
+                    <el-form-item  label="所属院系" v-if="Role">
+                        <el-input v-model="form.yuname" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="性别">
-                        <el-input v-model="form.sex"></el-input>
+                    <el-form-item label="性别" >
+                        <el-input v-model="form.sex" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="邮箱">
-                        <el-input v-model="form.email"></el-input>
+                    <el-form-item label="邮箱" >
+                        <el-input v-model="form.email" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="电话号码">
-                        <el-input v-model="form.tel"></el-input>
+                    <el-form-item label="电话号码" >
+                        <el-input v-model="form.tel" :disabled="true"></el-input>
                     </el-form-item>
                 </el-form>
             </section>
-            <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit()">确 定</el-button>
-      </span>
-        </el-dialog>-->
+        </el-dialog>
     </header>
 </template>
 
@@ -75,11 +64,21 @@
     export default {
         data() {
             return {
-                dialogVisible: false, //对话框
+                dialogVisible: false, //查看对话框
                 login_flag: false,
+                Role:false,//标识为教师时显示
                 user: { //用户信息
                     userName: null,
                     userId: null
+                },
+                form: {
+                   id:null,
+                   name:null,
+                   pwd:null,
+                   yuname:null,
+                   sex:null,
+                   email:null,
+                   tel:null
                 }
             }
         },
@@ -103,15 +102,60 @@
             index() {
                 this.$router.push({path: '/index'})
             },
-            exit() {
+            Info() {
                 let role = this.$cookies.get("role")
-                this.$router.push({path:"/"}) //跳转到登录页面
-                this.$cookies.remove("cname") //清除cookie
-                this.$cookies.remove("cid")
-                this.$cookies.remove("role")
-                if(role == 0) {
-                    this.menu.pop()
+                let userId = this.$cookies.get("cid")
+                this.dialogVisible = true
+                if(role == 0){
+                    //按条件查询信息
+                    this.$axios(`/api/admin/${userId}`).then(res => {
+                        if(res.data !=null) {
+                            this.form = res.data
+                            this.form.id=res.data.adminid
+                            this.form.name=res.data.adminname
+                            this.form.pwd=res.data.adminpwd
+                            this.form.sex=res.data.sex
+                            this.form.email=res.data.email
+                            this.form.tel=res.data.tel
+                            this.$message({
+                                message: '查询成功',
+                                type: 'success'
+                            })
+                        }else{
+                            this.$message({
+                                message: '查询失败',
+                                type: 'error'
+                            })
+                        }
+                    }).catch(error => {});
+                }else{
+                    //按条件查询信息
+                    this.$axios(`/api/teacher/${userId}`).then(res => {
+                        if(res.data.code ==200) {
+                            this.Role=true
+                            this.form = res.data.data
+                            this.form.id=res.data.data.teaid
+                            this.form.name=res.data.data.teaname
+                            this.form.pwd=res.data.data.teapwd
+                            this.form.yuname=res.data.data.institution.instituname
+                            this.form.sex=res.data.data.sex
+                            this.form.email=res.data.data.email
+                            this.form.tel=res.data.data.tel
+                            this.$message({
+                                message: '查询成功',
+                                type: 'success'
+                            })
+                        }else{
+                            this.$message({
+                                message: res.data.message,
+                                type: 'error'
+                            })
+                        }
+                    }).catch(error => {});
                 }
+            },
+            upPwd() {
+                this.$router.push({path: '/managerPwd'})
             },
             exit() {
                 let role = this.$cookies.get("role")
@@ -121,16 +165,7 @@
                 this.$cookies.remove("role")
                 if(role == 0) {
                     this.menu.pop()
-                }
-            },
-            exit() {
-                let role = this.$cookies.get("role")
-                this.$router.push({path:"/"}) //跳转到登录页面
-                this.$cookies.remove("cname") //清除cookie
-                this.$cookies.remove("cid")
-                this.$cookies.remove("role")
-                if(role == 0) {
-                    this.menu.pop()
+                    this.menu.pop()//弹出管理员所添加的菜单功能
                 }
             }
         },
@@ -198,7 +233,7 @@
         top: 80px;
         right: 0px;
         background-color: #fff;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        box-shadow: 0 6px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         padding: 12px;
     }
     .user .out ul {

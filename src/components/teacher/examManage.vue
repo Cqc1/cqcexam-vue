@@ -50,9 +50,9 @@
                     <el-form-item label="所属专业：">
                         <span>{{ props.row.major.major }}</span>
                     </el-form-item>
-                    <el-form-item label="备考[院系,专业]编号：">
+                    <!--<el-form-item label="备考[院系,专业]编号：">
                         <span>{{ props.row.majors }}</span>
-                    </el-form-item>
+                    </el-form-item>-->
                     <el-form-item label="学院：">
                         <span>{{ props.row.institution.instituname}}</span>
                     </el-form-item>
@@ -573,10 +573,6 @@
             },
         },
         computed: {
-            /*majorsId(){
-                this.majorsId=eval(this.form.majors)
-                return this.majorsId
-            },*/
             // 模糊搜索
             tables() {
                 const search = this.search;

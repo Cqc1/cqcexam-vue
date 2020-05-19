@@ -53,20 +53,40 @@
             handleTitle(index) {
                 this.bus.$emit('sendIndex',index)
             },
+            del(id){
+                this.menu.some((item, i)=>{
+                    if(item.index==id){
+                        this.list.splice(i, 1)
+                        //在数组的some方法中，如果return true，就会立即终止这个数组的后续循环
+                        return true
+                    }
+                })
+            },
+            Del(title){
+                var index = this.menu.findIndex(item =>{
+                    console.log(item.title.trim()==title);
+                    if(item.title.trim()==title){
+                        return true
+                    }
+                })
+                this.menu.splice(index,1)
+            },
             addData() {
                 let role = this.$cookies.get("role")
+                console.log(role);
                 if(role == 0) {
                     this.menu.push({
                         index: '7',
                         title: '教师管理',
                         icon: 'icon-Userselect',
                         content:[{item1:'教师管理',path:'/teacherManage'},{item2: '添加教师',path: '/addTeacher'}],
-                    }, {
+                    })
+                    this.menu.push({
                         index: '8',
                         title: '学院管理',
                         icon: 'iconxueyuan',
-                        content:[{item1:'院系管理',path:'/instituteManage'},{item2: '专业管理',path: '/majorManage'},{item2: '班级管理',path: '/classManage'}],
-                        },)
+                        content:[{item1:'院系管理',path:'/instituteManage'},{item2: '专业管理',path: '/majorManage'},{item3: '班级管理',path: '/classManage'}],
+                    },)
                 }
             }
         },

@@ -9,7 +9,7 @@
           <li><a href="javascript:;" @click="practice()">在线练习</a></li>
           <li><router-link to="/scoreTable">考试记录</router-link></li>
           <li><router-link to="/message">给我留言</router-link></li>
-          <li><a href="javascript:;">待定</a></li>
+          <!--<li><a href="javascript:;">待定</a></li>-->
           <li class="right" @mouseenter="flag = !flag" @mouseleave="flag = !flag">
             <a href="javascript:;"><i class="iconfont icon-Userselect icon"></i>{{user.userName}}</a>
             <div class="msg" v-if="flag">

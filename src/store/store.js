@@ -29,7 +29,7 @@ const state = {
       index: '4',
       title: '成绩管理',
       icon: 'iconchengjitubiao',
-      content:[{item1:'学生成绩查询',path:'/allStudentsGrade'},{item2: '成绩统计查询',path: '/selectExamToPart'},{item2: '试卷批阅',path: '/paperReview'},{path: '/scorePart'},{path: '/teaPreview'},{path: '/Preview'}],
+      content:[{item1:'学生成绩查询',path:'/allStudentsGrade'},{item2: '成绩统计查询',path: '/selectExamToPart'},{item3: '试卷批阅',path: '/paperReview'},{path: '/scorePart'},{path: '/teaPreview'},{path: '/Preview'}],
     },
     {
       index: '5',

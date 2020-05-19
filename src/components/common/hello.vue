@@ -1,7 +1,7 @@
 <template>
     <section class="index">
         <div class="hello">
-            <i class="iconfont icon-xihuan"></i><span>很高兴遇见你,{{user.userName}}老师。</span>
+            <i class="iconfont icon-xihuan"></i><span>很高兴遇见你,{{user.userName}}。</span>
         </div>
         <div class="msg">
             <p class="title">教务公告：</p>
@@ -31,6 +31,7 @@
             getUserInfo() { //获取用户信息
                 let userName = this.$cookies.get("cname")
                 let userId = this.$cookies.get("cid")
+                console.log(userName);
                 this.user.userName = userName
                 this.user.userId = userId
             },

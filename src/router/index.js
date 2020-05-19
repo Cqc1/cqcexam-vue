@@ -23,6 +23,9 @@ const routes = [
           loginRequest:true
         },
       },
+      {path: '/managerPwd', component: () => import('@/components/common/manager'),meta:{
+          loginRequest:true
+        },},
        /* 成绩管理模块*/
       {
         path:'/paperReview', //成绩批阅

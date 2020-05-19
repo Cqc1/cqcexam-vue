@@ -140,15 +140,19 @@
             onScreeoutQuesType(searchForm){
                 this.$refs[searchForm].validate((valid) => {
                     if (valid) {
-                        //按条件查询信息
-                        this.$axios(`/api/questype/${this.search_data.name}`).then(res => {
-                            this.pagination.total = res.data.data.length;
-                            this.tableData=[];
-                            for(var i=0;i<res.data.data.length;i++){
-                                this.tableData.push(res.data.data[i]);
-                            }
-                            this.loading = false;
-                        }).catch(error => {});
+                        if(this.search_data.name!=''){
+                            //按条件查询信息
+                            this.$axios(`/api/questype/${this.search_data.name}`).then(res => {
+                                this.pagination.total = res.data.data.length;
+                                this.tableData=[];
+                                for(var i=0;i<res.data.data.length;i++){
+                                    this.tableData.push(res.data.data[i]);
+                                }
+                                this.loading = false;
+                            }).catch(error => {});
+                        }else{
+                            this.getQuesTypeInfo();
+                        }
                     }
                 })
             },

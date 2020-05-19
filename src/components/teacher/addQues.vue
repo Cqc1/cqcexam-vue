@@ -29,13 +29,21 @@
                             </el-select>
                         </li>
                         <li>
-                            <span>所属章节：</span>
-                            <el-input
+                            <span>知识点所属章节：</span>
+                            <el-select v-model="form.chapter" placeholder="请选择知识点所属章节" class="w150">
+                                <el-option
+                                        v-for="item in chapters"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                            <!--<el-input
                                     placeholder="请输入对应章节"
                                     v-model="form.chapter"
                                     class="w150"
                                     clearable>
-                            </el-input>
+                            </el-input>-->
                         </li>
                         <li>
                             <span>难度等级：</span>
@@ -193,6 +201,48 @@
                         label: '5'
                     },
                 ],
+                chapters: [ //难度等级
+                    {
+                        value: '1',
+                        label: '1'
+                    },
+                    {
+                        value: '2',
+                        label: '2'
+                    },
+                    {
+                        value: '3',
+                        label: '3'
+                    },
+                    {
+                        value: '4',
+                        label: '4'
+                    },
+                    {
+                        value: '5',
+                        label: '5'
+                    },
+                    {
+                        value: '6',
+                        label: '6'
+                    },
+                    {
+                        value: '7',
+                        label: '7'
+                    },
+                    {
+                        value: '8',
+                        label: '8'
+                    },
+                    {
+                        value: '9',
+                        label: '9'
+                    },
+                    {
+                        value: '10',
+                        label: '10'
+                    },
+                ],
                 rights: [ //正确答案
                     {
                         value: 'A',
@@ -228,6 +278,7 @@
                 select:{
                     typevalue:-1,
                     couvalue:-1,
+                    chapvalue:-1,
                 },//保存题型和课程选择器中的信息，保证不能为空或未定义
             };
         },
@@ -269,7 +320,7 @@
             handleChange2(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
-                obj = this.options.find((item)=>{
+                obj = this.courses.find((item)=>{
                     return item.value === val;
                 });
                 //obj 就是被选中的那个对象，也就能拿到label值了。

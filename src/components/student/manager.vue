@@ -69,12 +69,15 @@
             let stuid = this.$cookies.get("cid")
             //按条件查询信息
             this.$axios(`/api/student/${this.$cookies.get("cid")}`).then(res => {
+              /*let stu=res.data.data*/
               if (this.ruleForm2.oldpass !== res.data.data.stupwd) {
                 this.$message({
                   message: '您输入的旧密码错误！',
                   type: 'error'
                 })
               }else{
+                /*stu.stupwd=this.ruleForm2.pass
+                stu.stuid=stuid*/
                 this.$axios({ //修改密码
                   url: '/api/studentPWD',
                   method: 'put',

@@ -63,6 +63,36 @@
                     </div>
                 </section>
             </el-tab-pane>
+            <el-tab-pane name="second">
+                <span slot="label"><i class="iconfont icon-daoru-tianchong"></i>手动组卷</span>
+                <div class="box">
+                    <ul>
+                        <li>
+                            <span>试题难度:</span>
+                            <el-select v-model="difficultyValue" placeholder="试题难度" class="w150">
+                                <el-option
+                                        v-for="item in difficulty"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </li>
+                        <li>
+                            <span>选择题数量：</span> <el-input type="text" v-model="changeNumber"></el-input>
+                        </li>
+                        <li>
+                            <span>填空题数量：</span> <el-input type="text" v-model="fillNumber"></el-input>
+                        </li>
+                        <li>
+                            <span>判断题数量：</span> <el-input type="text" v-model="judgeNumber"></el-input>
+                        </li>
+                        <li>
+                            <el-button type="primary" @click="create()">立即组卷</el-button>
+                        </li>
+                    </ul>
+                </div>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>

@@ -21,8 +21,10 @@
                     </el-form-item>
                     <div class="tiparea">
                         <p class="wxtip">温馨提示：</p>
-                        <p class="tip">用户名为：admin<span></span></p>
-                        <p class="tip">密码为：123456</p>
+                        <p class="tip">管理员体验账号为：10001<span></span></p>
+                        <p class="tip">管理员体验密码为：admin</p>
+                        <p class="tip">教师体验账号为：20001<span></span></p>
+                        <p class="tip">教师体验密码为：123456</p>
                     </div>
                 </el-form></div>
                 <div>
@@ -50,7 +52,7 @@
                 logo:logoImg,
                 loginForm: {
                     username: '216160514',
-                    password: '123456'
+                    password: '090822'
                 },
                 rules: {
                     username: [
@@ -70,8 +72,6 @@
                 console.log("登录操作执行-------");
                 this.$refs.loginForm.validate((valid) => {
                     if (valid) {
-                        // let userinfo = this.loginForm;
-                        // login(userinfo)
                         this.$axios({
                             url: `/api/login`,
                             method: 'post',
@@ -88,9 +88,7 @@
                                         this.$cookies.set("cname", resData.adminname)
                                         this.$cookies.set("cid", resData.adminid)
                                         this.$cookies.set("role", 0)
-                                        let redirect=decodeURIComponent(this.$route.query.redirect||'/')
                                         setToken("Token",resData.token)
-                                        // this.$store.dispatch('initLeftMenu'); //设置左边菜单始终为展开状态
                                         this.$router.push({path: '/index'}) //跳转到首页
                                         break
                                     case "1": //教师
