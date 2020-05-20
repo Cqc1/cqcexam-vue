@@ -46,8 +46,8 @@
                             </el-input>-->
                         </li>
                         <li>
-                            <span>难度等级：</span>
-                            <el-select v-model="form.level" placeholder="选择难度等级" class="w150">
+                            <span>难度系数：</span>
+                            <el-select v-model="form.level" placeholder="选择难度系数" class="w150">
                                 <el-option
                                         v-for="item in levels"
                                         :key="item.value"
@@ -182,23 +182,41 @@
                 levels: [ //难度等级
                     {
                         value: '1',
-                        label: '1'
+                        label: '0.1'
                     },
                     {
                         value: '2',
-                        label: '2'
+                        label: '0.2'
                     },
                     {
                         value: '3',
-                        label: '3'
+                        label: '0.3'
                     },
                     {
                         value: '4',
-                        label: '4'
+                        label: '0.4'
                     },
                     {
                         value: '5',
-                        label: '5'
+                        label: '0.5'
+                    },
+                    {
+                        value: '6',
+                        label: '0.6'
+                    },
+                    {
+                        value: '7',
+                        label: '0.7'
+                    },{
+                        value: '8',
+                        label: '0.8'
+                    },
+                    {
+                        value: '9',
+                        label: '0.9'
+                    },{
+                        value: '10',
+                        label: '1.0'
                     },
                 ],
                 chapters: [ //难度等级

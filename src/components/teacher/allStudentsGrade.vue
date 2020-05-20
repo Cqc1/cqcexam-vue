@@ -36,7 +36,7 @@
       <el-table-column align='center' prop="major" label="专业" width="150"></el-table-column>
       <el-table-column align='center' prop="grade" label="年级" width="150"></el-table-column>
       <el-table-column align='center' prop="claname" label="班级" width="100"></el-table-column>
-      <el-table-column align='center' prop="description" label="试卷" width="150"></el-table-column>
+      <el-table-column align='center' prop="exname" label="试卷" width="150"></el-table-column>
       <el-table-column align='center' prop="objscore" label="客观得分" width="80"></el-table-column>
       <el-table-column align='center' prop="subscore" label="主观得分" width="80"></el-table-column>
       <el-table-column align='center' prop="totalscore" label="总分" width="80"></el-table-column>
@@ -82,7 +82,7 @@
             <el-input v-model="form.examid" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="考试名称：">
-            <el-input v-model="form.description" :disabled="true"></el-input>
+            <el-input type="textarea" rows="1" resize="none" v-model="form.exname" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="客观题得分：">
             <el-input v-model="form.objscore" :disabled="true"></el-input>

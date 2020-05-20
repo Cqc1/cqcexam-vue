@@ -24,13 +24,13 @@
     <div class="main">
       <router-view></router-view>
     </div>
-    <v-footer></v-footer>
+    <!--<v-footer class="el-footer"></v-footer>-->
   </div>
 </template>
 
 <script>
-import myFooter from "@/components/student/myFooter"
 import store from '@/store/store'
+import myFooter from "@/components/common/myFooter"
 import {mapState} from 'vuex'
 export default {
   store,
@@ -79,6 +79,14 @@ export default {
 </script>
 
 <style scoped>
+  .el-footer{
+    position: absolute;
+    text-align:center;
+    bottom:0;
+    margin:0 auto;
+    width:100%;
+    color: #5c6b77
+  }
 .right .icon {
   margin-right: 6px;
 }

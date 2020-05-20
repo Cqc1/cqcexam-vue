@@ -82,7 +82,7 @@
               <ul>
                 <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{singAnswer.answer}}</span></li>
                 <li><el-tag>题目解析：</el-tag></li>
-                <li>{{singAnswer.analysis == null ? '暂无解析': singAnswer.analysis}}</li>
+                <li>{{singAnswer.analysis == null||singAnswer.analysis == '' ? '暂无解析': singAnswer.analysis}}</li>
               </ul>
             </div>
           </div>
@@ -98,7 +98,7 @@
                 <ul>
                   <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{multAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{multAnswer.analysis == null ? '暂无解析': multAnswer.analysis}}</li>
+                  <li>{{multAnswer.analysis == null||multAnswer.analysis == '' ? '暂无解析': multAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>
@@ -114,7 +114,7 @@
                 <ul>
                   <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{fillAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{fillAnswer.analysis == null ? '暂无解析': fillAnswer.analysis}}</li>
+                  <li>{{fillAnswer.analysis == null ||fillAnswer.analysis == ''? '暂无解析': fillAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>
@@ -128,7 +128,7 @@
                 <ul>
                   <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{judgeAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{judgeAnswer.analysis == null ? '暂无解析': judgeAnswer.analysis}}</li>
+                  <li>{{judgeAnswer.analysis == null||judgeAnswer.analysis == '' ? '暂无解析': judgeAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>
@@ -142,9 +142,10 @@
               </el-input>
               <div class="analysis" v-if="isPractice">
                 <ul>
-                  <li> <el-tag type="success">正确答案：</el-tag><span class="right">{{shortAnswer.answer}}</span></li>
+                  <li> <el-tag type="success">正确答案：</el-tag>
+                  <span class="right">{{shortAnswer.answer}}</span></li>
                   <li><el-tag>题目解析：</el-tag></li>
-                  <li>{{shortAnswer.analysis == null ? '暂无解析': shortAnswer.analysis}}</li>
+                  <li>{{shortAnswer.analysis == null||shortAnswer.analysis == '' ? '暂无解析': shortAnswer.analysis}}</li>
                 </ul>
               </div>
             </div>

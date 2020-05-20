@@ -66,9 +66,9 @@
                 </el-table-column>
                 <el-table-column type="selection" align='center'>
                 </el-table-column>
-                <el-table-column prop="couname" label="所属课程" align='center'>
+                <el-table-column prop="couname" label="所属课程" align='center' width="200">
                 </el-table-column>
-                <el-table-column prop="question" label="题目信息" align='center'>
+                <el-table-column prop="question" label="题目信息" align='center' width="300">
                 </el-table-column>
                 <el-table-column prop="chapter" label="所属章节" align='center'>
                 </el-table-column>
@@ -112,25 +112,25 @@
                             <el-input v-model="form.course.couname" :disabled="true"></el-input>
                         </el-form-item>
                         <el-form-item label="题目信息">
-                            <el-input v-model="form.question" :disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.question" :disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item v-if="form.questype==1||form.questype==2" label="选项A">
-                            <el-input v-model="form.optiona":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.optiona":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item v-if="form.questype==1||form.questype==2" label="选项B">
-                            <el-input v-model="form.optionb":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.optionb":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item v-if="form.questype==1||form.questype==2" label="选项C">
-                            <el-input v-model="form.optionc":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.optionc":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item v-if="form.questype==1||form.questype==2" label="选项D">
-                            <el-input v-model="form.optiond":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.optiond":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item label="试题答案">
-                            <el-input v-model="form.answer":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.answer":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item label="试题解析">
-                            <el-input v-model="form.analysis":disabled="this.look"></el-input>
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.analysis":disabled="this.look"></el-input>
                         </el-form-item>
                         <el-form-item label="试题分值">
                             <el-input v-model="form.score":disabled="this.look"></el-input>

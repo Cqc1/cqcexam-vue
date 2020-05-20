@@ -39,6 +39,7 @@
                             </el-option>
                         </el-select>
                         </li>
+                        <li class="msg" @click="openMsg()"><i class="iconfont icon-flag"></i>组卷说明</li>
                     </ul>
                     <!-- 题型数量设置部分 -->
                     <div class="change" >
@@ -63,7 +64,7 @@
                     </div>
                 </section>
             </el-tab-pane>
-            <el-tab-pane name="second">
+            <!--<el-tab-pane name="second">
                 <span slot="label"><i class="iconfont icon-daoru-tianchong"></i>手动组卷</span>
                 <div class="box">
                     <ul>
@@ -92,7 +93,7 @@
                         </li>
                     </ul>
                 </div>
-            </el-tab-pane>
+            </el-tab-pane>-->
         </el-tabs>
     </div>
 </template>
@@ -118,25 +119,25 @@
                 },
                 levels: [ //难度等级
                     {
-                        value: '1',
-                        label: '1'
-                    },
-                    {
-                        value: '2',
-                        label: '2'
-                    },
-                    {
                         value: '3',
-                        label: '3'
+                        label: '简单'
                     },
                     {
+                        value: '7',
+                        label: '良好'
+                    },
+                    {
+                        value: '10',
+                        label: '困难'
+                    },
+                    /*{
                         value: '4',
                         label: '4'
                     },
                     {
                         value: '5',
                         label: '5'
-                    },
+                    },*/
                 ],
                 typename:[],
                 rules: {
@@ -232,40 +233,49 @@
                 //obj 就是被选中的那个对象，也就能拿到label值了。
                 this.formData.courseid=obj.value;
             },
+            openMsg() {
+                this.$alert('本系统组卷为随机组卷、单选题每题默认2分、多选题每题默认4分、填空题每题默认2分、判断题每题默认2分、简答题每题默认5分，其他非客观题默认每题5分。','随机组卷说明',{
+                    confirmButtonText: '确定'
+                })
+            },
             Submit() { //提交
-                if(this.formData.courseid!=''&&this.formData.level!='') {
-                    this.formData.user = this.$cookies.get("cname")
-                    this.$axios({
-                        url: '/api/item',
-                        method: 'post',
-                        data: {
-                            ...this.formData
-                        }
-                    }).then(res => {
-                        console.log(res)
-                        let data = res.data
-                        if (data.code == 200) {
-                            setTimeout(() => {
-                                this.$router.push({path: '/paperManage'})
-                            }, 1000)
-                            this.$message({
-                                message: data.message,
-                                type: 'success'
-                            })
-                        } else if (data.code == 400) {
-                            this.$message({
-                                message: data.message,
-                                type: 'error'
-                            })
-                        }
+                /*this.openMsg();*/
+                this.$confirm('是否已经认真阅读组卷说明？', '提示').then(() => {
+                    if (this.formData.courseid != '' && this.formData.level != '') {
+                        this.formData.user = this.$cookies.get("cname")
+                        this.$axios({
+                            url: '/api/item',
+                            method: 'post',
+                            data: {
+                                ...this.formData
+                            }
+                        }).then(res => {
+                            console.log(res)
+                            let data = res.data
+                            if (data.code == 200) {
+                                setTimeout(() => {
+                                    this.$router.push({path: '/paperManage'})
+                                }, 1000)
+                                this.$message({
+                                    message: data.message,
+                                    type: 'success'
+                                })
+                            } else if (data.code == 400) {
+                                this.$message({
+                                    message: data.message,
+                                    type: 'error'
+                                })
+                            }
 
-                    })
-                }else{
-                    this.$message({
-                        message: '请选择所属课程以及难度等级!',
-                        type: 'error'
-                    })
-                }
+                        })
+                    } else {
+                        this.$message({
+                            message: '请选择所属课程以及难度等级!',
+                            type: 'error'
+                        })
+                    }
+                }).catch(() => {
+                })
             },
         }
     };

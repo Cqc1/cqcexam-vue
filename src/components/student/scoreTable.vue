@@ -67,6 +67,8 @@ export default {
             return item
           }, []);
           this.filter = newArr
+        }else{
+          this.loading = false //数据加载完成去掉遮罩
         }
       })
     },

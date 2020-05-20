@@ -41,7 +41,7 @@
                         <div class="options" align='left'>
                         <ul>
                             <li>
-                                <el-tag type="success">解析:</el-tag> <span>  {{currentQues.analysis}}</span>
+                                <el-tag type="success">解析:</el-tag> <span> {{currentQues.analysis == null ||currentQues.analysis == ''? '暂无解析': currentQues.analysis}}</span>
                             </li>
                         </ul>
                        </div>
@@ -67,9 +67,9 @@
                             </ul>
                         </div>
                         <div class="submit">
-                            <el-button type="primary" @click="previous()">上一题</el-button>
-                            <el-button type="primary" :disabled="save"@click="Submit()">提交</el-button>
-                            <el-button type="primary" @click="next()">下一题</el-button>
+                           <!-- <el-button type="primary" @click="previous()">上一题</el-button>-->
+                            <el-button type="primary" @click="Submit()">提交</el-button>
+                            <!--<el-button type="primary" @click="next()">下一题</el-button>-->
                         </div>
                       </div>
                 </section>
@@ -166,7 +166,7 @@
                     }
                 }).catch(error => {});
             },
-            //获取下拉框中的值
+            /*//获取下拉框中的值
             handleChange(val){
                 //传进来的val是select组件选中的value值
                 let obj = {}; //用来存储下拉框中的对象
@@ -193,7 +193,7 @@
                 if(this.questype==5){
                     this.currentArry=this.shortArry;
                 }
-            },
+            },*/
             change(questype,quesid,index) { //单项选择题
                 this.$axios(`/api/selectOne/${questype}/${quesid}`).then(res => {
                         this.currentQues = {...res.data.data}
@@ -233,8 +233,8 @@
                 let cont=true;
                 for(var i=0;i<this.getScore.length;i++){
                     if(this.getScore[i]!=null&&this.getScore[i]!=''){
-                        console.log(this.getScore[i]);
-                        this.getSum+=Number(this.getScore[i])
+                        /*console.log(this.getScore[i]);
+                        this.getSum+=Number(this.getScore[i])*/
                         this.commit=true;
                     }else{
                         this.commit=false;
@@ -246,6 +246,10 @@
                     }
                 }
                 if(this.commit&&cont){
+                    for(var i=0;i<this.getScore.length;i++){
+                        console.log(this.getScore[i]);
+                        this.getSum+=Number(this.getScore[i])
+                        }
                     let scoreid = this.$route.query.scoreid
                     let examid = this.$route.query.examid
                     this.$axios(`/api/score/selectById/${scoreid}`).then(res => {
@@ -369,7 +373,7 @@
         margin-top: 20px;
         .right {
             color: #2776df;
-            font-size: 18px;
+            font-size: 10px;
             border: 1px solid #2776df;
             padding: 0px 6px;
             border-radius: 4px;

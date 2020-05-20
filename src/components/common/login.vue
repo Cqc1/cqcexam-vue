@@ -27,26 +27,22 @@
                         <p class="tip">教师体验密码为：123456</p>
                     </div>
                 </el-form></div>
-                <div>
-                    <el-row class="footer">
-                    <el-col>
-                        <p class="msg2">版权所有 ©2020 南京工程学院软件161班cqc </p>
-                    </el-col>
-                </el-row>
-                </div>
             </section>
         </transition>
+        <v-footer class="el-footer"></v-footer>
     </div>
 </template>
 
 <script>
     import logoImg from "@/assets/img/logo.jpg";
-    import store from '@/store/store'
-    import { login } from "@/api/user";
+    import myFooter from "@/components/common/myFooter"
     import { setToken } from '@/utils/auth'
     import {mapState} from 'vuex'
 
     export default {
+        components: {
+            "v-footer": myFooter
+        },
         data(){
             return {
                 logo:logoImg,
@@ -134,6 +130,14 @@
         height: 100%;
         background: url('../../assets/img/login.jpg')center top / cover no-repeat;
         background-size: 100% 100%;
+    }
+    .el-footer{
+        position: absolute;
+        text-align:center;
+        bottom:0;
+        margin:0 auto;
+        width:100%;
+        color: #5c6b77
     }
     .form_contianer{
         position: absolute;

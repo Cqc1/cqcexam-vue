@@ -35,7 +35,7 @@
             <div class="title">
               <span>{{examData.exname}}</span><i class="header-icon el-icon-info"></i>
               <span class="time">{{examData.paper.totalscore}}分 / {{examData.extime}}分钟</span>
-              <el-button type="primary" size="small">点击查看试题详情</el-button>
+              <!--<el-button type="primary" size="small">点击查看试题详情</el-button>-->
             </div>
           </template>
           <el-collapse class="inner">
@@ -182,7 +182,7 @@ export default {
   margin-right: 10px;
 }
 #msg .content .title {
-  font-size: 20px;
+  font-size: 15px;
   margin: 0px;
   display: flex;
   align-items: center;
