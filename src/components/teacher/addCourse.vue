@@ -1,38 +1,50 @@
 <!-- 添加课程 -->
 <template>
-    <section class="add">
-        <el-form ref="form" :rules="rules" :model="form" label-width="90px" class="demo-dynamic">
-            <el-form-item prop="couname" label="课程名称">
-                <el-input v-model="form.couname"></el-input>
-            </el-form-item>
-            <el-form-item prop="couperiod" label="课程学时">
-                <el-input v-model.number="form.couperiod"></el-input>
-            </el-form-item>
-            <el-form-item  prop="institutionid" label="所属院系">
-                <el-select v-model="form.institutionid"  @change="change" placeholder="请选择学院">
-                    <el-option
-                            v-for="item in Institutions"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item prop="credit" label="课程学分">
-                <el-input v-model.number="form.credit"></el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
-                <el-button type="text" @click="cancel()">取消</el-button>
-            </el-form-item>
-        </el-form>
-    </section>
+    <div class="add">
+        <el-tabs v-model="activeName">
+            <el-tab-pane name="first">
+                <span slot="label"><i class="el-icon-circle-plus"></i>添加课程</span>
+                <section class="append">
+                    <el-form ref="form" :rules="rules" :model="form" label-width="90px" class="demo-dynamic">
+                        <div class="change" >
+                            <el-form-item prop="couname" label="课程名称">
+                                <el-input v-model="form.couname"></el-input>
+                            </el-form-item>
+                            <el-form-item prop="couperiod" label="课程学时">
+                                <el-input v-model.number="form.couperiod"></el-input>
+                            </el-form-item>
+                            <el-form-item  prop="institutionid" label="所属院系">
+                                <el-select v-model="form.institutionid"  @change="change" placeholder="请选择学院">
+                                    <el-option
+                                            v-for="item in Institutions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="credit" label="课程学分">
+                                <el-input v-model.number="form.credit"></el-input>
+                            </el-form-item>
+                            <div class="submit">
+                                <el-form-item>
+                                    <el-button type="primary" @click="onSubmit('form')">添加</el-button>
+                                    <el-button type="primary" @click="cancel()">取消</el-button>
+                                </el-form-item>
+                                <!-- <el-button type="primary" @click="Submit()">立即添加</el-button>-->
+                            </div>
+                        </div>
+                    </el-form>
+                </section>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
 </template>
-
 <script>
     export default {
         data() {
             return {
+                activeName: 'first',  //活动选项卡
                 form: { //表单数据初始化
                     couname: null,
                     credit: null,
@@ -110,7 +122,85 @@
 </script>
 <style lang="scss" scoped>
     .add {
-        padding: 0px 40px;
-        width: 400px;
+        margin: 0px 40px;
+        .box {
+            padding: 0px 20px;
+            ul li {
+                margin: 10px 0px;
+                display: flex;
+                align-items: center;
+                .el-input {
+                    width: 6%;
+                }
+                .w150 {
+                    margin-left: 20px;
+                    width: 7%;
+                }
+            }
+        }
+        .el-icon-circle-plus {
+            margin-right: 10px;
+        }
+        .icon-daoru-tianchong {
+            margin-right: 10px;
+        }
+        .append {
+            margin: 0px 20px;
+            ul {
+                display: flex;
+                align-items: center;
+                li {
+                    margin-right: 20px;
+                }
+            }
+            .change {
+                margin-top: 20px;
+                padding: 20px 16px;
+                background-color: #E7F6F6;
+                border-radius: 4px;
+                .title {
+                    padding-left: 6px;
+                    color: #2f4f4f;
+                    span:nth-child(1) {
+                        margin-right: 6px;
+                    }
+                    .el-input{
+                        width: 98% !important;
+                    }
+                    .el-textarea {
+                        width: 98% !important;
+                    }
+                }
+                .options {
+                    ul {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    ul li {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 98%;
+                        margin: 10px 0px;
+                        span {
+                            margin-right: 20px;
+                        }
+                    }
+                }
+                .submit {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+            .w150 {
+                width: 130px;
+            }
+            li:nth-child(2) {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
     }
 </style>

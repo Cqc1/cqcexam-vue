@@ -8,6 +8,48 @@
             </el-col>
             <el-col :span="20" class="topbar-right">
                 <i class="el-icon-menu" @click="toggle()"></i>
+                <div class="userinfo-right rflex">
+                 <div class="notify-row">
+                    <ul class="top-menu">
+                        <li class="li-badge">
+                            <el-tooltip class="item" effect="dark" content="访问github" placement="top">
+                                <a :href='github' target="_blank">
+                                    <icon-svg icon-class="iconGithub" />
+                                </a>
+                            </el-tooltip>
+                        </li>
+                        <li class="li-badge">
+                            <a :href='github' target="_blank" v-popover:qcode>
+                                <icon-svg icon-class="iconwechat" />
+                                <el-popover
+                                        ref="qcode"
+                                        popper-class="qcodepopper"
+                                        placement="bottom"
+                                        trigger="hover">
+                                    <div class="wechat-area cflex">
+                                        <p class="titles">加我微信</p>
+                                        <img :src="wechat.wechatImg" alt="加我微信"  />
+                                    </div>
+                                </el-popover>
+                            </a>
+                        </li>
+                        <li class="li-badge">
+                            <a :href='github' target="_blank" v-popover:qqcode>
+                                <icon-svg icon-class="iconqq" />
+                                <el-popover
+                                        ref="qqcode"
+                                        popper-class="qcodepopper"
+                                        placement="bottom"
+                                        trigger="hover">
+                                    <div class="wechat-area cflex">
+                                        <p class="titles">加我qq</p>
+                                        <img :src="qq.qqImg" alt="加入qq群"  />
+                                    </div>
+                                </el-popover>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <div class="user">
                     <span>{{user.userName}}</span>
                     <img src="@/assets/img/user.png" class="user-img" ref="img" @click="showSetting()" />
@@ -20,6 +62,7 @@
                             </ul>
                         </div>
                     </transition>
+                </div>
                 </div>
             </el-col>
         </el-row>
@@ -61,9 +104,21 @@
 <script>
     import store from '@/store/store'
     import {mapState,mapMutations} from 'vuex'
+    import wechatImg from "@/assets/img/wechat.png";
+    import qqImg from "@/assets/img/qq.png";
+    import { github } from "@/utils/env";
     export default {
         data() {
             return {
+                wechat:{
+                    wechatImg:wechatImg,
+                    isWechat:false
+                },
+                qq:{
+                    qqImg:qqImg,
+                    isQq:false,
+                },
+                github:github,
                 dialogVisible: false, //查看对话框
                 login_flag: false,
                 Role:false,//标识为教师时显示
@@ -251,5 +306,92 @@
         margin-top: 4px;
         padding-top: 4px;
         border-top: 1px solid #ccc;
+    }
+</style>
+<style scoped lang='less'>
+    .right-nav{
+        display: flex;
+        flex: 1;
+        width:calc(100% - 180px);
+        padding-right: 15px;
+        justify-content: space-between;
+        box-shadow:0px 2px 5px 0px rgba(237,233,233,0.5);
+    }
+    .head-nav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 29;
+        transition: width .2s;
+        justify-content: space-between;
+        height: 60px;
+        box-sizing: border-box;
+        background: #fff;
+        .logout {
+            vertical-align: middle;
+            cursor: pointer;
+        }
+    }
+    .middle{
+        align-items: center;
+        border:1px solid;
+    }
+    .userinfo-right{
+        width:320px;
+        padding: 0 10px;
+        justify-content: space-between;
+    }
+    .userinfo {
+        line-height: 60px;
+        text-align:right;
+    }
+    .avatar{
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        vertical-align: middle;
+        display: inline-block;
+    }
+    .langAvatar{
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        vertical-align: middle;
+        display: inline-block;
+    }
+    .welcome{
+        display: inline-block;
+        vertical-align: middle;
+        padding: 0 5px;
+        .name{
+            line-height: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .avatarname{
+            color:#a9d86e;
+            font-weight:bolder;
+            font-size: 13px;
+        }
+    }
+
+    .username {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    .border{
+        border:1px solid;
+    }
+    .notify-row{
+        line-height:60px;
+        flex:1;
+        ul{
+            display: flex;
+            justify-content: space-around;
+        }
+    }
+
+    ul.top-menu > li {
+        position: relative;
     }
 </style>

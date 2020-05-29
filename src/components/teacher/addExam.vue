@@ -1,5 +1,5 @@
 <!-- 添加考试 -->
-<template>
+<!--<template>
     <section class="add">
         <el-form ref="form" :rules="rules" :model="form" label-width="100px">
             <el-form-item  prop="institutionid" label="所属院系：">
@@ -66,10 +66,6 @@
                 <el-input v-model.number="form.extime"></el-input>
             </el-form-item>
             <el-form-item prop="exdate" label="考试日期：">
-                <!--<el-col :span="11">
-                    <el-date-picker type="date" placeholder="选择日期" format="yyyy-MM-dd"
-                                    v-model="form.exdate" style="width: 100%;"></el-date-picker>
-                </el-col>-->
                 <el-date-picker
                         v-model="form.exdate"
                         type="datetime"
@@ -95,8 +91,124 @@
             </el-form-item>
         </el-form>
     </section>
+</template>-->
+<template>
+    <div class="add">
+        <el-tabs v-model="activeName">
+            <el-tab-pane name="first">
+                <span slot="label"><i class="el-icon-circle-plus"></i>添加考试</span>
+                <section class="append">
+                    <el-form ref="form" :rules="rules" :model="form" label-width="100px">
+                      <ul>
+                        <li>
+                            <el-form-item  prop="institutionid" label="所属院系：">
+                                <el-select v-model="form.institutionid" @change="handleChange1" placeholder="请选择学院">
+                                    <el-option
+                                            v-for="item in Institutions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </li>
+                        <li>
+                            <el-form-item prop="courseid" label="所属课程：">
+                                <el-select v-model="form.courseid" @change="handleChange2" :placeholder="placeholder">
+                                    <el-option
+                                            v-for="item in Courses"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </li>
+                        <li>
+                            <el-form-item prop="majorid" label="所属专业：">
+                                <el-select v-model="form.majorid"  :placeholder="InstituHolder" @change="change()">
+                                    <el-option
+                                            v-for="item in Majors"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </li>
+                          <li>
+                              <el-form-item prop="paperid" label="试卷选择：">
+                                  <el-select v-model="form.paperid" @change="change" :placeholder="placeholder2">
+                                      <el-option
+                                              v-for="item in Papers"
+                                              :key="item.value"
+                                              :label="item.label"
+                                              :value="item.value">
+                                      </el-option>
+                                  </el-select>
+                              </el-form-item>
+                          </li>
+                          <li>
+                              <el-form-item prop="majorsId" label="备考专业：">
+                                  <div class="block">
+                                      <el-cascader
+                                              v-model="form.majorsId" placeholder="请选择学院专业" ref="Cascader"
+                                              :options="institutionList" separator="/"
+                                              :props="majorrop" expand-trigger="hover"
+                                              @change="MajorsChange"
+                                              clearable>
+                                      </el-cascader>
+                                  </div>
+                              </el-form-item>
+                          </li>
+                    </ul>
+                    <div class="change" >
+                        <el-form-item prop="exname" label="考试名称：">
+                            <el-input v-model="form.exname"></el-input>
+                        </el-form-item>
+                        <el-form-item prop="grade" label="年级：">
+                            <el-input v-model="form.grade"></el-input>
+                        </el-form-item>
+                        <el-form-item prop="term" label="学期：">
+                            <el-input v-model="form.term"></el-input>
+                        </el-form-item>
+                        <el-form-item prop="extime" label="考试时长：">
+                            <el-input v-model.number="form.extime"></el-input>
+                        </el-form-item>
+                        <el-form-item prop="exdate" label="考试日期：">
+                            <el-date-picker
+                                    v-model="form.exdate"
+                                    type="datetime"
+                                    placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item prop="description" label="考试介绍：">
+                            <el-input type="textarea" rows="1" resize="none" v-model="form.description"></el-input>
+                        </el-form-item>
+                        <el-form-item  prop="isexam" label="考试类型：">
+                            <el-select v-model="form.isexam"  placeholder="请选择类型">
+                                <el-option
+                                        v-for="item in types"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div class="submit">
+                            <el-form-item>
+                                <el-button type="primary" @click="onSubmit('form')">添加</el-button>
+                                <el-button type="primary" @click="cancel()">取消</el-button>
+                            </el-form-item>
+                           <!-- <el-button type="primary" @click="Submit()">立即添加</el-button>-->
+                        </div>
+                    </div>
+                    </el-form>
+                </section>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
 </template>
-
 <script>
     export default {
         props: {
@@ -109,6 +221,7 @@
         },
         data() {
             return {
+                activeName: 'first',  //活动选项卡
                 Majors:[],//专业下拉框
                 majorValue: '',
                 InstituHolder:'',
@@ -435,8 +548,86 @@
 </script>
 <style lang="scss" scoped>
     .add {
-        padding: 0px 40px;
-        width: 400px;
+        margin: 0px 40px;
+        .box {
+            padding: 0px 20px;
+            ul li {
+                margin: 10px 0px;
+                display: flex;
+                align-items: center;
+                .el-input {
+                    width: 6%;
+                }
+                .w150 {
+                    margin-left: 20px;
+                    width: 7%;
+                }
+            }
+        }
+        .el-icon-circle-plus {
+            margin-right: 10px;
+        }
+        .icon-daoru-tianchong {
+            margin-right: 10px;
+        }
+        .append {
+            margin: 0px 20px;
+            ul {
+                display: flex;
+                align-items: center;
+                li {
+                    margin-right: 20px;
+                }
+            }
+            .change {
+                margin-top: 20px;
+                padding: 20px 16px;
+                background-color: #E7F6F6;
+                border-radius: 4px;
+                .title {
+                    padding-left: 6px;
+                    color: #2f4f4f;
+                    span:nth-child(1) {
+                        margin-right: 6px;
+                    }
+                    .el-input{
+                        width: 98% !important;
+                    }
+                    .el-textarea {
+                        width: 98% !important;
+                    }
+                }
+                .options {
+                    ul {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    ul li {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 98%;
+                        margin: 10px 0px;
+                        span {
+                            margin-right: 20px;
+                        }
+                    }
+                }
+                .submit {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+            .w150 {
+                width: 130px;
+            }
+            li:nth-child(2) {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
     }
 </style>
 

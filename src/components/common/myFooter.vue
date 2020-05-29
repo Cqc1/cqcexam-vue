@@ -4,8 +4,8 @@
     <ul style="text-align:center;bottom:0;margin:0 auto;width:100%;color: #000000">
       <li><a target="_blank" style="color: #FF7622" href="http://www.beian.miit.gov.cn">豫ICP备20010791</a></li>
       <li><a href="http://www.njit.edu.cn/">@2020 南京工程学院</a></li>
-      <li>计算机学院 软件161</li>
-      <li>@Copyright 2020. ALL Rights Reserved CQC</li>
+      <li>计算机工程学院 软件161</li>
+      <li><a href="https://github.com/Cqc1">@Copyright 2020. ALL Rights Reserved CQC</a></li>
     </ul>
   </footer>
 </template>
@@ -38,3 +38,4 @@ export default {
   margin-right: 20px;
 }
 </style>
+

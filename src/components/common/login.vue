@@ -53,7 +53,7 @@
                 rules: {
                     username: [
                         { required: true, message: '请输入用户名', trigger: 'blur' },
-                        { min: 2, max: 9, message: '长度在 2 到 9个字符', trigger: 'blur' }
+                        { min: 2, max: 9, message: '请输入数字字符型且长度在 2 到 9个字符', trigger: 'blur' }
                     ],
                     password: [
                         { required: true, message: '请输入密码', trigger: 'blur' }
@@ -84,20 +84,17 @@
                                         this.$cookies.set("cname", resData.adminname)
                                         this.$cookies.set("cid", resData.adminid)
                                         this.$cookies.set("role", 0)
-                                        setToken("Token",resData.token)
                                         this.$router.push({path: '/index'}) //跳转到首页
                                         break
                                     case "1": //教师
                                         this.$cookies.set("cname", resData.teaname)
                                         this.$cookies.set("cid", resData.teaid)
                                         this.$cookies.set("role", 1)
-                                        setToken("Token",resData.token)
                                         this.$router.push({path: '/index'}) //跳转到教师用户
                                         break
                                     case "2": //学生
                                         this.$cookies.set("cname", resData.stuname)
                                         this.$cookies.set("cid", resData.stuid)
-                                        setToken("Token",resData.token)
                                         this.$router.push({path: '/student'})
                                         break
                                 }
